@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flip 7 Scorer</title>
+<style>
+  :root{
+    --felt:#0c5a3f; --felt2:#0a4a34;
+    --ink:#0d1117; --paper:#fbf7ee;
+    --accent:#F85609; --gold:#f5c542;
+    --bust:#d6453a; --good:#2fae6a;
+    --line:rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%,var(--felt) 0%,var(--felt2) 70%,#073525 100%);
+    color:var(--paper); min-height:100vh; padding:14px;
+  }
+  .wrap{max-width:780px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .brand{display:flex;align-items:baseline;gap:8px}
+  .brand h1{font-size:26px;margin:0;letter-spacing:-.5px;font-weight:800}
+  .brand h1 .seven{color:var(--gold)}
+  .target{font-size:12px;opacity:.8}
+  .hbtns{display:flex;gap:8px}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:700}
+  .ghost{background:rgba(255,255,255,.12);color:var(--paper);padding:9px 12px;font-size:13px}
+  .ghost:active{background:rgba(255,255,255,.22)}
+
+  .round-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);
+    padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:10px}
+
+  /* player card */
+  .player{background:var(--paper);color:var(--ink);border-radius:16px;margin-bottom:10px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);overflow:hidden}
+  .prow{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+  .rank{width:26px;height:26px;flex:0 0 auto;border-radius:50%;background:#e9e2d2;display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#6b6450}
+  .rank.lead{background:var(--gold);color:#5a4500}
+  .pname{flex:1;min-width:0;font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pname.win{color:var(--accent)}
+  .ptotal{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .pthis{font-size:12px;color:#7a735f;text-align:right;min-width:64px}
+  .pthis b{display:block;font-size:15px;color:var(--ink)}
+  .pthis b.bust{color:var(--bust)}
+  .chev{font-size:13px;color:#b3ab97;transition:transform .15s}
+  .player.open .chev{transform:rotate(90deg)}
+
+  .panel{display:none;padding:0 14px 14px;border-top:1px solid var(--line)}
+  .player.open .panel{display:block}
+  .panel h4{margin:12px 0 7px;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#8a8268}
+
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+  .tile{aspect-ratio:1/1;border-radius:10px;background:#fff;border:2px solid #e3dcca;
+    font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;
+    user-select:none}
+  .tile:active{transform:scale(.93)}
+  .tile.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .mods{display:flex;flex-wrap:wrap;gap:7px}
+  .mod{padding:9px 13px;border-radius:10px;background:#fff;border:2px solid #e3dcca;font-size:15px;font-weight:800;color:var(--ink)}
+  .mod.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .mod.x2.on{background:#7b3ff2;border-color:#7b3ff2}
+
+  .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;
+    background:#f3eede;border-radius:12px;padding:11px 13px}
+  .summary .calc{font-size:13px;color:#7a735f}
+  .flip7tag{display:inline-block;background:var(--gold);color:#5a4500;font-weight:800;font-size:11px;
+    padding:2px 7px;border-radius:999px;margin-left:6px}
+  .roundscore{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+  .roundscore.bust{color:var(--bust)}
+
+  .panelbtns{display:flex;gap:8px;margin-top:11px}
+  .bustbtn{flex:1;padding:11px;border-radius:11px;background:#fbeae8;color:var(--bust);border:2px solid #f3c9c4;font-size:14px}
+  .bustbtn.on{background:var(--bust);color:#fff;border-color:var(--bust)}
+  .clearbtn{flex:1;padding:11px;border-radius:11px;background:#eee8da;color:#6b6450;font-size:14px}
+  .renamebtn,.delbtn{padding:11px 13px;border-radius:11px;background:#eee8da;color:#6b6450;font-size:14px}
+  .delbtn{background:#fbeae8;color:var(--bust)}
+
+  .addrow{display:flex;gap:8px;margin:4px 0 14px}
+  .addrow input{flex:1;padding:13px 14px;border-radius:12px;border:none;font-size:16px;font-family:inherit}
+  .addrow button{background:var(--accent);color:#fff;padding:0 18px;font-size:16px}
+
+  .endbtn{position:sticky;bottom:10px;width:100%;background:var(--accent);color:#fff;
+    padding:16px;font-size:18px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.35);margin-top:6px}
+  .endbtn:disabled{opacity:.4}
+
+  .winbanner{background:linear-gradient(90deg,var(--gold),#ffd866);color:#5a4500;border-radius:14px;
+    padding:14px 16px;font-weight:800;font-size:18px;text-align:center;margin-bottom:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .empty{opacity:.8;text-align:center;padding:30px 10px;font-size:15px;line-height:1.5}
+  .hist{font-size:11px;color:#9a937e;margin-top:6px;word-break:break-word}
+  .footer{text-align:center;font-size:11px;opacity:.55;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Flip&nbsp;<span class="seven">7</span></h1>
+      <span class="target">first to 200 wins</span>
+    </div>
+    <div class="hbtns">
+      <button class="ghost" id="undoBtn">Undo round</button>
+      <button class="ghost" id="resetBtn">New game</button>
+    </div>
+  </header>
+
+  <div class="round-pill">Round <span id="roundNum">1</span></div>
+  <div id="winWrap"></div>
+
+  <div class="addrow">
+    <input id="nameInput" placeholder="Add player name…" autocomplete="off" maxlength="16">
+    <button id="addBtn">Add</button>
+  </div>
+
+  <div id="players"></div>
+
+  <button class="endbtn" id="endBtn">End round &amp; bank scores</button>
+
+  <div class="footer">Tap a player to enter their cards. Saved automatically on this computer.</div>
+</div>
+
+<script>
+const TARGET = 200;
+const NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+const MODS = [2,4,6,8,10];
+const LS = 'flip7-scorer-v1';
+
+let state = load() || { round:1, players:[], openId:null };
+
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
+function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+function uid(){ return 'p'+(state.players.reduce((m,p)=>Math.max(m,+p.id.slice(1)||0),0)+1); }
+
+function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false }; }
+
+function addPlayer(name){
+  name = (name||'').trim(); if(!name) return;
+  state.players.push({ id:uid(), name, total:0, rounds:[], draft:freshDraft() });
+  save(); render();
+}
+
+function roundScore(d){
+  if(d.bust) return 0;
+  let numSum = d.numbers.reduce((a,b)=>a+b,0);
+  if(d.x2) numSum *= 2;
+  let mods = d.mods.reduce((a,b)=>a+b,0);
+  let bonus = d.numbers.length>=7 ? 15 : 0;
+  return numSum + mods + bonus;
+}
+
+function endRound(){
+  if(!state.players.length) return;
+  // snapshot for undo
+  state._undo = JSON.parse(JSON.stringify({ round:state.round, players:state.players }));
+  state.players.forEach(p=>{
+    const s = roundScore(p.draft);
+    p.rounds.push({ score:s, bust:p.draft.bust, flip7:p.draft.numbers.length>=7 });
+    p.total += s;
+    p.draft = freshDraft();
+  });
+  state.round++;
+  state.openId = null;
+  save(); render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function undo(){
+  if(!state._undo){ return; }
+  state.round = state._undo.round;
+  state.players = state._undo.players;
+  state._undo = null;
+  state.players.forEach(p=>{ if(!p.draft) p.draft=freshDraft(); });
+  save(); render();
+}
+
+function winner(){
+  const done = state.players.filter(p=>p.total>=TARGET);
+  if(!done.length) return null;
+  return state.players.slice().sort((a,b)=>b.total-a.total)[0];
+}
+
+function render(){
+  document.getElementById('roundNum').textContent = state.round;
+  document.getElementById('undoBtn').style.display = state._undo ? '' : 'none';
+
+  // winner banner
+  const w = winner();
+  const winWrap = document.getElementById('winWrap');
+  winWrap.innerHTML = w ? `<div class="winbanner">🏆 ${escapeHtml(w.name)} wins with ${w.total}!</div>` : '';
+
+  const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
+  const lead = ranked.length ? ranked[0].total : 0;
+
+  const root = document.getElementById('players');
+  if(!state.players.length){
+    root.innerHTML = `<div class="empty">Add each player above to start scoring.<br>Then tap a player and tap the number cards they kept this round.</div>`;
+    document.getElementById('endBtn').disabled = true;
+    return;
+  }
+  document.getElementById('endBtn').disabled = false;
+
+  root.innerHTML = state.players.map(p=>{
+    const d = p.draft, s = roundScore(d), open = state.openId===p.id;
+    const isLead = p.total===lead && lead>0;
+    const winClass = (w && w.id===p.id) ? 'win' : '';
+    const thisLabel = d.bust ? '<b class="bust">BUST</b>' : `<b>${s}</b>`;
+    const flip7 = d.numbers.length>=7;
+    const histStr = p.rounds.length
+      ? 'rounds: '+p.rounds.map(r=>r.bust?'×':(r.score+(r.flip7?'⚡':''))).join(' · ')
+      : '';
+
+    return `
+    <div class="player ${open?'open':''}" data-id="${p.id}">
+      <div class="prow" data-act="toggle">
+        <div class="rank ${isLead?'lead':''}">${rankOf(ranked,p)}</div>
+        <div class="pname ${winClass}">${escapeHtml(p.name)}</div>
+        <div class="pthis">this round${thisLabel}</div>
+        <div class="ptotal">${p.total}</div>
+        <div class="chev">▶</div>
+      </div>
+      <div class="panel">
+        <h4>Number cards kept (${d.numbers.length})</h4>
+        <div class="grid">
+          ${NUMBERS.map(n=>`<div class="tile ${d.numbers.includes(n)?'on':''}" data-act="num" data-n="${n}">${n}</div>`).join('')}
+        </div>
+        <h4>Modifiers</h4>
+        <div class="mods">
+          ${MODS.map(m=>`<div class="mod ${d.mods.includes(m)?'on':''}" data-act="mod" data-m="${m}">+${m}</div>`).join('')}
+          <div class="mod x2 ${d.x2?'on':''}" data-act="x2">×2</div>
+        </div>
+        <div class="summary">
+          <div class="calc">${calcText(d)}${flip7?'<span class="flip7tag">FLIP 7 +15</span>':''}</div>
+          <div class="roundscore ${d.bust?'bust':''}">${d.bust?'0':s}</div>
+        </div>
+        <div class="panelbtns">
+          <button class="bustbtn ${d.bust?'on':''}" data-act="bust">${d.bust?'Busted ✕':'Bust (0)'}</button>
+          <button class="clearbtn" data-act="clear">Clear</button>
+        </div>
+        <div class="panelbtns">
+          <button class="renamebtn" data-act="rename">Rename</button>
+          <button class="delbtn" data-act="del">Remove</button>
+        </div>
+        ${histStr?`<div class="hist">${histStr}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rankOf(ranked,p){ return ranked.findIndex(x=>x.id===p.id)+1; }
+
+function calcText(d){
+  if(d.bust) return 'Busted this round';
+  if(!d.numbers.length && !d.mods.length) return 'No cards yet';
+  let numSum = d.numbers.reduce((a,b)=>a+b,0);
+  let parts = [];
+  parts.push(d.x2 ? `(${numSum})×2` : `${numSum}`);
+  d.mods.forEach(m=>parts.push('+'+m));
+  if(d.numbers.length>=7) parts.push('+15');
+  return parts.join(' ');
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- events ----
+document.getElementById('addBtn').onclick = ()=>{
+  const i = document.getElementById('nameInput'); addPlayer(i.value); i.value=''; i.focus();
+};
+document.getElementById('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ document.getElementById('addBtn').click(); }});
+document.getElementById('endBtn').onclick = ()=>{
+  const anyScored = state.players.some(p=>roundScore(p.draft)>0 || p.draft.bust);
+  if(!anyScored && !confirm('No scores entered this round. Bank a round of zeros anyway?')) return;
+  endRound();
+};
+document.getElementById('undoBtn').onclick = undo;
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('Start a brand new game? This clears all scores.')){
+    state = { round:1, players:state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})), openId:null };
+    if(confirm('Keep the same players? OK = keep, Cancel = remove everyone.')){} else { state.players=[]; }
+    save(); render();
+  }
+};
+
+document.getElementById('players').addEventListener('click', e=>{
+  const card = e.target.closest('.player'); if(!card) return;
+  const p = state.players.find(x=>x.id===card.dataset.id); if(!p) return;
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  const d = p.draft;
+
+  if(act==='toggle'){ state.openId = state.openId===p.id ? null : p.id; save(); render(); return; }
+  if(act==='num'){
+    const n = +e.target.dataset.n;
+    if(d.numbers.includes(n)) d.numbers = d.numbers.filter(x=>x!==n);
+    else d.numbers.push(n);
+    if(d.numbers.length) d.bust=false;
+  }
+  if(act==='mod'){
+    const m = +e.target.dataset.m;
+    if(d.mods.includes(m)) d.mods = d.mods.filter(x=>x!==m); else d.mods.push(m);
+  }
+  if(act==='x2'){ d.x2=!d.x2; }
+  if(act==='bust'){ d.bust=!d.bust; }
+  if(act==='clear'){ p.draft=freshDraft(); }
+  if(act==='rename'){
+    const nn = prompt('Rename player:', p.name);
+    if(nn && nn.trim()) p.name=nn.trim();
+  }
+  if(act==='del'){
+    if(confirm('Remove '+p.name+'?')){ state.players=state.players.filter(x=>x.id!==p.id); if(state.openId===p.id) state.openId=null; }
+  }
+  save(); render();
+});
+
+// ensure drafts exist on load
+state.players.forEach(p=>{ if(!p.draft) p.draft=freshDraft(); });
+render();
+</script>
+</body>
+</html>

@@ -33,11 +33,11 @@
   }
   .wrap{max-width:780px;margin:0 auto}
   header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-  .brand{display:flex;align-items:baseline;gap:8px}
+  .brand{display:flex;align-items:baseline;gap:8px;min-width:0}
   .brand h1{font-size:26px;margin:0;letter-spacing:-.5px;font-weight:800}
   .brand h1 .seven{color:var(--gold)}
-  .target{font-size:12px;opacity:.8}
-  .hbtns{display:flex;gap:8px}
+  .target{font-size:12px;opacity:.8;white-space:nowrap}
+  .hbtns{display:flex;gap:8px;flex:0 0 auto}
   button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:700}
   .iconbtn{width:42px;height:42px;font-size:18px;background:rgba(255,255,255,.12);color:var(--paper);display:flex;align-items:center;justify-content:center}
   .iconbtn:active{background:rgba(255,255,255,.24)}
@@ -52,16 +52,16 @@
   .player{background:var(--paper);color:var(--ink);border-radius:16px;margin-bottom:10px;
     box-shadow:0 6px 18px rgba(0,0,0,.25);overflow:hidden}
   .prow{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
-  .rank{width:26px;height:26px;flex:0 0 auto;border-radius:50%;background:#e9e2d2;display:flex;
-    align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#6b6450}
-  .rank.lead{background:var(--gold);color:#5a4500}
+  .avatar{width:36px;height:36px;flex:0 0 auto;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;color:#fff;font-size:16px;font-weight:800;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
   .pname{flex:1;min-width:0;font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pname.win{color:var(--accent)}
+  .medal{font-size:18px;flex:0 0 auto}
   .ptotal{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
-  .pthis{font-size:12px;color:#7a735f;text-align:right;min-width:64px}
+  .pthis{font-size:12px;color:#7a735f;text-align:right;min-width:56px}
   .pthis b{display:block;font-size:15px;color:var(--ink)}
   .pthis b.bust{color:var(--bust)}
-  .chev{font-size:13px;color:#b3ab97;transition:transform .15s}
+  .chev{font-size:13px;color:#b3ab97;transition:transform .15s;flex:0 0 auto}
   .player.open .chev{transform:rotate(90deg)}
 
   .panel{display:none;padding:0 14px 14px;border-top:1px solid var(--line)}
@@ -116,24 +116,33 @@
   .overlay.show{display:flex}
   .sheet{background:var(--paper);color:var(--ink);border-radius:20px;width:100%;max-width:520px;
     max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
+  .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:1}
   .sheet-h h3{margin:0;font-size:18px}
   .closex{width:34px;height:34px;border-radius:50%;background:#eee8da;color:#6b6450;font-size:16px}
   .sheet-b{padding:16px 18px}
+  .sheet-b h4{margin:14px 0 8px;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#8a8268}
+  .sheet-b h4:first-child{margin-top:0}
 
   /* winner */
   .wintrophy{font-size:54px;text-align:center;margin:6px 0 2px}
   .winname{font-size:30px;font-weight:800;text-align:center;color:var(--accent)}
   .winscore{font-size:15px;text-align:center;color:#7a735f;margin-bottom:14px}
-  .winrank{list-style:none;padding:0;margin:0 0 16px}
-  .winrank li{display:flex;justify-content:space-between;padding:9px 12px;border-radius:10px;font-weight:700;font-size:15px}
+  .winrank{list-style:none;padding:0;margin:0 0 4px}
+  .winrank li{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:10px;font-weight:700;font-size:15px}
   .winrank li:nth-child(odd){background:#f3eede}
+  .winrank li span:first-child{display:flex;align-items:center;gap:7px}
+  #winStats{margin:6px 0 16px}
+  .winstat{font-size:14px;color:#6b6450;padding:5px 2px}
+  .winstat b{color:var(--ink)}
   .winbtns{display:flex;gap:8px}
   .winbtns button{flex:1;padding:14px;font-size:15px}
   .btn-primary{background:var(--accent);color:#fff}
   .btn-sub{background:#eee8da;color:#6b6450}
 
-  /* scoreboard */
+  /* color dot */
+  .dot{display:inline-block;width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+
+  /* scoreboard + leaderboard tables */
   .logtable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   .logtable th,.logtable td{padding:8px 6px;text-align:center;font-size:14px;border-bottom:1px solid var(--line);white-space:nowrap}
   .logtable th{font-size:12px;color:#8a8268;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--paper)}
@@ -141,8 +150,23 @@
   .logtable td.b{color:var(--bust);font-weight:800}
   .logtable .f7{color:#caa400;margin-left:2px}
   .logtable tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:800;font-size:16px;padding-top:11px}
+  .logtable td.name{text-align:left}
+  .logtable td.name .dot{margin-right:7px;vertical-align:middle}
   .logwrap{overflow-x:auto}
-  .logempty{text-align:center;color:#9a937e;padding:24px 0;font-size:14px}
+  .logempty{text-align:center;color:#9a937e;padding:24px 0;font-size:14px;line-height:1.5}
+
+  /* past games */
+  .gamecard{background:#f3eede;border-radius:12px;padding:11px 13px;margin-bottom:8px}
+  .gc-h{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
+  .gc-d{font-weight:600;font-size:12px;color:#9a937e}
+  .gc-s{font-size:13px;color:#6b6450;margin-top:4px}
+
+  /* segmented control (settings) */
+  .seg{display:flex;gap:6px;margin-bottom:6px}
+  .seg button{flex:1;padding:11px 6px;border-radius:10px;background:#fff;border:2px solid #e3dcca;
+    font-weight:800;color:var(--ink);font-size:14px}
+  .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .set-note{font-size:12px;color:#9a937e;margin:2px 0 4px}
 
   /* custom modal (replaces native confirm/prompt/alert) */
   .modal-sheet{max-width:420px}
@@ -164,11 +188,12 @@
   <header>
     <div class="brand">
       <h1>Flip&nbsp;<span class="seven">7</span></h1>
-      <span class="target">first to 200 wins</span>
+      <span class="target" id="targetSub">first to 200 wins</span>
     </div>
     <div class="hbtns">
-      <button class="iconbtn" id="soundBtn" title="Sound">🔊</button>
+      <button class="iconbtn" id="histBtn" title="History">🏆</button>
       <button class="iconbtn" id="logBtn" title="Scoreboard">📊</button>
+      <button class="iconbtn" id="setBtn" title="Settings">⚙️</button>
     </div>
   </header>
 
@@ -205,6 +230,7 @@
       <div class="winname" id="winName"></div>
       <div class="winscore" id="winScore"></div>
       <ul class="winrank" id="winRank"></ul>
+      <div id="winStats"></div>
       <div class="winbtns">
         <button class="btn-sub" id="winClose">Keep playing</button>
         <button class="btn-primary" id="winNew">New game</button>
@@ -221,6 +247,38 @@
   </div>
 </div>
 
+<!-- History overlay -->
+<div class="overlay" id="historyOverlay">
+  <div class="sheet">
+    <div class="sheet-h"><h3>History</h3><button class="closex" id="histClose">✕</button></div>
+    <div class="sheet-b" id="histBody"></div>
+  </div>
+</div>
+
+<!-- Settings overlay -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <div class="sheet-h"><h3>Settings</h3><button class="closex" id="setClose">✕</button></div>
+    <div class="sheet-b">
+      <h4>Winning score</h4>
+      <div class="seg" id="targetSeg">
+        <button data-t="100">100</button>
+        <button data-t="150">150</button>
+        <button data-t="200">200</button>
+        <button data-t="custom">Custom</button>
+      </div>
+      <input class="modal-input" id="targetCustom" type="number" min="1" max="9999" inputmode="numeric" placeholder="Custom target" style="display:none;margin-top:8px">
+      <p class="set-note">Official Flip 7 plays to 200. Lower it for a quicker game.</p>
+      <h4>Sound &amp; haptics</h4>
+      <div class="seg" id="soundSeg">
+        <button data-s="on">On</button>
+        <button data-s="off">Off</button>
+      </div>
+      <p class="set-note">Chimes on Flip 7 &amp; wins, a buzz on busts.</p>
+    </div>
+  </div>
+</div>
+
 <!-- Generic modal (confirm / prompt / alert) -->
 <div class="overlay" id="modalOverlay">
   <div class="sheet modal-sheet">
@@ -234,22 +292,30 @@
 </div>
 
 <script>
-const TARGET = 200;
 const NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12];
 const MODS = [2,4,6,8,10];
 const LS = 'flip7-scorer-v1';
+const HLS = 'flip7-history-v1';
+const PRESETS = [100,150,200];
+const PALETTE = ['#F85609','#2fae6a','#7b3ff2','#e0397a','#1f8fd6','#e0a000','#0d9488','#d6453a','#5b6ef5','#b45309'];
 
-let state = load() || { round:1, players:[], openId:null, muted:false };
-if(typeof state.muted !== 'boolean') state.muted = false;
+let state = load() || { round:1, players:[], openId:null, muted:false, target:200 };
 
 function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
 function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HLS)) || []; }catch(e){ return []; } }
+function saveHistoryRecord(rec){ const h = loadHistory(); h.push(rec); try{ localStorage.setItem(HLS, JSON.stringify(h)); }catch(e){} }
 function uid(){ return 'p'+(state.players.reduce((m,p)=>Math.max(m,+p.id.slice(1)||0),0)+1); }
 function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false }; }
+function initial(name){ return (String(name).trim()[0] || '?').toUpperCase(); }
+function pickColor(){
+  const used = new Set(state.players.map(p=>p.color));
+  return PALETTE.find(c=>!used.has(c)) || PALETTE[state.players.length % PALETTE.length];
+}
 
 function addPlayer(name){
   name = (name||'').trim(); if(!name) return;
-  state.players.push({ id:uid(), name, total:0, rounds:[], draft:freshDraft() });
+  state.players.push({ id:uid(), name, total:0, rounds:[], draft:freshDraft(), color:pickColor() });
   save(); render(); reqWake();
 }
 
@@ -265,7 +331,7 @@ function roundScore(d){
 function endRound(){
   if(!state.players.length) return;
   state._undo = JSON.parse(JSON.stringify({ round:state.round, players:state.players }));
-  const hadWinner = state._undo.players.some(p=>p.total>=TARGET);
+  const hadWinner = state._undo.players.some(p=>p.total>=state.target);
   let flip7s = 0;
   state.players.forEach(p=>{
     const s = roundScore(p.draft);
@@ -281,8 +347,20 @@ function endRound(){
   window.scrollTo({top:0,behavior:'smooth'});
 
   const w = winner();
-  if(w && !hadWinner){ sfx('win'); confetti(180); showWin(w); }
-  else if(flip7s){ confetti(70); }
+  if(w && !hadWinner){
+    saveHistoryRecord({
+      date: Date.now(),
+      target: state.target,
+      rounds: state.round - 1,
+      winner: w.name,
+      players: state.players.map(p=>({
+        name:p.name, total:p.total, color:p.color,
+        flip7s:p.rounds.filter(r=>r.flip7).length,
+        busts:p.rounds.filter(r=>r.bust).length
+      }))
+    });
+    sfx('win'); confetti(180); showWin(w);
+  } else if(flip7s){ confetti(70); }
 }
 
 function undo(){
@@ -295,7 +373,7 @@ function undo(){
 }
 
 function winner(){
-  const done = state.players.filter(p=>p.total>=TARGET);
+  const done = state.players.filter(p=>p.total>=state.target);
   if(!done.length) return null;
   return state.players.slice().sort((a,b)=>b.total-a.total)[0];
 }
@@ -303,7 +381,7 @@ function winner(){
 function render(){
   document.getElementById('roundNum').textContent = state.round;
   document.getElementById('undoBtn').hidden = !state._undo;
-  document.getElementById('soundBtn').textContent = state.muted ? '🔇' : '🔊';
+  document.getElementById('targetSub').textContent = `first to ${state.target} wins`;
 
   const w = winner();
   document.getElementById('winWrap').innerHTML = w
@@ -322,7 +400,8 @@ function render(){
 
   root.innerHTML = state.players.map(p=>{
     const d = p.draft, s = roundScore(d), open = state.openId===p.id;
-    const isLead = p.total===lead && lead>0;
+    const rank = rankOf(ranked,p);
+    const medal = (rank<=3 && p.total>0 && state.players.length>1) ? ['🥇','🥈','🥉'][rank-1] : '';
     const winClass = (w && w.id===p.id) ? 'win' : '';
     const thisLabel = d.bust ? '<b class="bust">BUST</b>' : `<b>${s}</b>`;
     const flip7 = d.numbers.length>=7;
@@ -333,9 +412,10 @@ function render(){
     return `
     <div class="player ${open?'open':''}" data-id="${p.id}">
       <div class="prow" data-act="toggle">
-        <div class="rank ${isLead?'lead':''}">${rankOf(ranked,p)}</div>
+        <div class="avatar" style="background:${p.color||'#888'}">${escapeHtml(initial(p.name))}</div>
         <div class="pname ${winClass}">${escapeHtml(p.name)}</div>
         <div class="pthis">this round${thisLabel}</div>
+        ${medal?`<div class="medal">${medal}</div>`:''}
         <div class="ptotal">${p.total}</div>
         <div class="chev">▶</div>
       </div>
@@ -381,6 +461,8 @@ function calcText(d){
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function show(id){ document.getElementById(id).classList.add('show'); }
+function hide(id){ document.getElementById(id).classList.remove('show'); }
 
 /* ---------- custom modal (replaces native confirm/prompt/alert) ---------- */
 function modal({ title='', message='', html=false, input=null, stack=false, buttons=[] }){
@@ -444,14 +526,33 @@ function uiAlert({ title, message, okText='Got it' }){
   return modal({ title, message, html:true, buttons:[{ label:okText, value:true, style:'primary' }] });
 }
 
-/* ---------- winner overlay ---------- */
+/* ---------- winner overlay + game stats ---------- */
+function gameStats(){
+  let topF7={n:0,name:''}, bigR={s:0,name:''}, mostB={b:0,name:''};
+  state.players.forEach(p=>{
+    const f7 = p.rounds.filter(r=>r.flip7).length;
+    const busts = p.rounds.filter(r=>r.bust).length;
+    const big = p.rounds.reduce((m,r)=>Math.max(m,r.score),0);
+    if(f7>topF7.n) topF7={n:f7,name:p.name};
+    if(big>bigR.s) bigR={s:big,name:p.name};
+    if(busts>mostB.b) mostB={b:busts,name:p.name};
+  });
+  const out=[];
+  if(bigR.s>0) out.push(`🔥 Biggest round — <b>${escapeHtml(bigR.name)}</b> (${bigR.s})`);
+  if(topF7.n>0) out.push(`⚡ Most Flip 7s — <b>${escapeHtml(topF7.name)}</b> (${topF7.n})`);
+  if(mostB.b>0) out.push(`💥 Most busts — <b>${escapeHtml(mostB.name)}</b> (${mostB.b})`);
+  return out;
+}
 function showWin(w){
   const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
   document.getElementById('winName').textContent = w.name;
   document.getElementById('winScore').textContent = w.total + ' points';
   document.getElementById('winRank').innerHTML = ranked.map((p,i)=>
-    `<li><span>${['🥇','🥈','🥉'][i]||((i+1)+'.')} ${escapeHtml(p.name)}</span><span>${p.total}</span></li>`).join('');
-  document.getElementById('winOverlay').classList.add('show');
+    `<li><span><span class="dot" style="background:${p.color||'#888'}"></span>${['🥇','🥈','🥉'][i]||((i+1)+'.')} ${escapeHtml(p.name)}</span><span>${p.total}</span></li>`).join('');
+  const stats = gameStats();
+  document.getElementById('winStats').innerHTML = stats.length
+    ? '<h4>Game highlights</h4>'+stats.map(s=>`<div class="winstat">${s}</div>`).join('') : '';
+  show('winOverlay');
 }
 
 /* ---------- scoreboard ---------- */
@@ -474,7 +575,66 @@ function showLog(){
     const tot = '<tr class="tot"><td>Σ</td>'+state.players.map(p=>`<td>${p.total}</td>`).join('')+'</tr>';
     body.innerHTML = `<table class="logtable"><thead><tr>${head}</tr></thead><tbody>${rows}${tot}</tbody></table>`;
   }
-  document.getElementById('logOverlay').classList.add('show');
+  show('logOverlay');
+}
+
+/* ---------- history + leaderboard ---------- */
+function showHistory(){
+  const hist = loadHistory();
+  const body = document.getElementById('histBody');
+  if(!hist.length){
+    body.innerHTML = `<div class="logempty">No finished games yet.<br>Win a game to 200 and it'll be saved here — with an all-time leaderboard.</div>`;
+    show('historyOverlay'); return;
+  }
+  // aggregate leaderboard by player name
+  const agg = {};
+  hist.forEach(g=>g.players.forEach(p=>{
+    const a = agg[p.name] || (agg[p.name]={ name:p.name, games:0, wins:0, best:0, flip7s:0, color:p.color });
+    a.games++; a.best=Math.max(a.best,p.total); a.flip7s+=(p.flip7s||0);
+    if(p.color) a.color=p.color;
+    if(g.winner===p.name) a.wins++;
+  }));
+  const board = Object.values(agg).sort((a,b)=> b.wins-a.wins || b.best-a.best || b.games-a.games);
+  let lb = `<table class="logtable"><thead><tr><th class="name" style="text-align:left">Player</th><th>Wins</th><th>Games</th><th>Best</th><th>⚡</th></tr></thead><tbody>`;
+  lb += board.map(a=>`<tr>
+      <td class="name"><span class="dot" style="background:${a.color||'#888'}"></span>${escapeHtml(a.name)}</td>
+      <td><b>${a.wins}</b></td><td>${a.games}</td><td>${a.best}</td><td>${a.flip7s}</td></tr>`).join('');
+  lb += `</tbody></table>`;
+
+  const past = hist.slice().reverse().map(g=>{
+    const dt = new Date(g.date);
+    const dstr = dt.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+dt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    const scores = g.players.slice().sort((a,b)=>b.total-a.total)
+      .map(p=>`${escapeHtml(p.name)} ${p.total}`).join(' · ');
+    return `<div class="gamecard"><div class="gc-h"><span>🏆 ${escapeHtml(g.winner)}</span><span class="gc-d">${dstr}</span></div><div class="gc-s">${scores}</div></div>`;
+  }).join('');
+
+  body.innerHTML = `<h4>All-time leaderboard</h4><div class="logwrap">${lb}</div>`
+    + `<h4>Past games (${hist.length})</h4>${past}`
+    + `<button class="mbtn btn-sub" id="clearHist" style="width:100%;margin-top:6px">Clear history</button>`;
+  const cb = document.getElementById('clearHist');
+  if(cb) cb.onclick = async ()=>{
+    const ok = await uiConfirm({ title:'Clear history?', message:'Delete all saved games and stats? This can’t be undone.', confirmText:'Clear', danger:true });
+    if(ok){ localStorage.removeItem(HLS); showHistory(); }
+  };
+  show('historyOverlay');
+}
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  const t = state.target, custom = !PRESETS.includes(t);
+  document.querySelectorAll('#targetSeg button').forEach(b=>{
+    const v = b.dataset.t;
+    b.classList.toggle('on', v==='custom' ? custom : (+v===t));
+  });
+  const ci = document.getElementById('targetCustom');
+  ci.style.display = custom ? '' : 'none';
+  if(custom) ci.value = t;
+}
+function showSettings(){
+  document.querySelectorAll('#soundSeg button').forEach(b=> b.classList.toggle('on', (b.dataset.s==='off')===state.muted));
+  renderSettings();
+  show('settingsOverlay');
 }
 
 /* ---------- sound + haptics ---------- */
@@ -573,24 +733,45 @@ document.getElementById('resetBtn').onclick = async ()=>{
     ]
   });
   if(!choice) return;
-  state = { round:1, muted:state.muted, openId:null,
-    players: choice==='keep' ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})) : [] };
+  state = { round:1, muted:state.muted, target:state.target, openId:null,
+    players: choice==='keep' ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft(),color:p.color})) : [] };
   save(); render();
 };
 
-document.getElementById('soundBtn').onclick = ()=>{
-  state.muted = !state.muted; save(); render();
-  if(!state.muted) sfx('flip7'); // little confirmation chirp when unmuting
-};
+// header buttons
+document.getElementById('histBtn').onclick = showHistory;
 document.getElementById('logBtn').onclick = showLog;
-document.getElementById('logClose').onclick = ()=>document.getElementById('logOverlay').classList.remove('show');
-document.getElementById('winClose').onclick = ()=>document.getElementById('winOverlay').classList.remove('show');
-document.getElementById('winNew').onclick = ()=>{
-  document.getElementById('winOverlay').classList.remove('show');
-  document.getElementById('resetBtn').click();
-};
-[document.getElementById('logOverlay'),document.getElementById('winOverlay')].forEach(ov=>{
-  ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show'); });
+document.getElementById('setBtn').onclick = showSettings;
+document.getElementById('logClose').onclick = ()=>hide('logOverlay');
+document.getElementById('histClose').onclick = ()=>hide('historyOverlay');
+document.getElementById('setClose').onclick = ()=>hide('settingsOverlay');
+document.getElementById('winClose').onclick = ()=>hide('winOverlay');
+document.getElementById('winNew').onclick = ()=>{ hide('winOverlay'); document.getElementById('resetBtn').click(); };
+
+['logOverlay','historyOverlay','settingsOverlay','winOverlay'].forEach(id=>{
+  const ov = document.getElementById(id);
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
+});
+
+// settings: target
+document.getElementById('targetSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const v = b.dataset.t;
+  if(v==='custom'){ if(PRESETS.includes(state.target)) state.target = 250; }
+  else state.target = +v;
+  save(); renderSettings(); render();
+  if(v==='custom') setTimeout(()=>document.getElementById('targetCustom').focus(),60);
+});
+document.getElementById('targetCustom').addEventListener('input', e=>{
+  let n = parseInt(e.target.value,10);
+  if(!isNaN(n) && n>0){ state.target = Math.min(n,9999); save(); render(); }
+});
+// settings: sound
+document.getElementById('soundSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  state.muted = b.dataset.s==='off';
+  save(); showSettings(); render();
+  if(!state.muted) sfx('flip7');
 });
 
 document.getElementById('players').addEventListener('click', e=>{
@@ -651,8 +832,10 @@ if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
 
-/* ---------- init ---------- */
-state.players.forEach(p=>{ if(!p.draft) p.draft=freshDraft(); });
+/* ---------- init / migration ---------- */
+if(typeof state.muted !== 'boolean') state.muted = false;
+if(typeof state.target !== 'number') state.target = 200;
+state.players.forEach((p,i)=>{ if(!p.draft) p.draft=freshDraft(); if(!p.color) p.color = PALETTE[i % PALETTE.length]; });
 render();
 reqWake();
 </script>

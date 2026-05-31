@@ -2,14 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Flip 7 Scorer</title>
+<meta name="description" content="A quick scorekeeper for the card game Flip 7.">
+<meta name="theme-color" content="#0c5a3f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flip 7">
 <style>
   :root{
     --felt:#0c5a3f; --felt2:#0a4a34;
     --ink:#0d1117; --paper:#fbf7ee;
     --accent:#F85609; --gold:#f5c542;
-    --bust:#d6453a; --good:#2fae6a;
+    --bust:#d6453a; --good:#2fae6a; --purple:#7b3ff2;
     --line:rgba(0,0,0,.12);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -17,23 +27,28 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:radial-gradient(120% 120% at 50% 0%,var(--felt) 0%,var(--felt2) 70%,#073525 100%);
-    color:var(--paper); min-height:100vh; padding:14px;
+    background-attachment:fixed;
+    color:var(--paper); min-height:100vh;
+    padding:max(14px,env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
   }
   .wrap{max-width:780px;margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
   .brand{display:flex;align-items:baseline;gap:8px}
   .brand h1{font-size:26px;margin:0;letter-spacing:-.5px;font-weight:800}
   .brand h1 .seven{color:var(--gold)}
   .target{font-size:12px;opacity:.8}
   .hbtns{display:flex;gap:8px}
   button{font-family:inherit;cursor:pointer;border:none;border-radius:12px;font-weight:700}
+  .iconbtn{width:42px;height:42px;font-size:18px;background:rgba(255,255,255,.12);color:var(--paper);display:flex;align-items:center;justify-content:center}
+  .iconbtn:active{background:rgba(255,255,255,.24)}
   .ghost{background:rgba(255,255,255,.12);color:var(--paper);padding:9px 12px;font-size:13px}
   .ghost:active{background:rgba(255,255,255,.22)}
 
+  .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .toolbar .spacer{flex:1}
   .round-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);
-    padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700;margin-bottom:10px}
+    padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700}
 
-  /* player card */
   .player{background:var(--paper);color:var(--ink);border-radius:16px;margin-bottom:10px;
     box-shadow:0 6px 18px rgba(0,0,0,.25);overflow:hidden}
   .prow{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
@@ -55,15 +70,14 @@
 
   .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
   .tile{aspect-ratio:1/1;border-radius:10px;background:#fff;border:2px solid #e3dcca;
-    font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;
-    user-select:none}
+    font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;user-select:none}
   .tile:active{transform:scale(.93)}
   .tile.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
   .mods{display:flex;flex-wrap:wrap;gap:7px}
   .mod{padding:9px 13px;border-radius:10px;background:#fff;border:2px solid #e3dcca;font-size:15px;font-weight:800;color:var(--ink)}
   .mod.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .mod.x2.on{background:#7b3ff2;border-color:#7b3ff2}
+  .mod.x2.on{background:var(--purple);border-color:var(--purple)}
 
   .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;
     background:#f3eede;border-radius:12px;padding:11px 13px}
@@ -84,19 +98,55 @@
   .addrow input{flex:1;padding:13px 14px;border-radius:12px;border:none;font-size:16px;font-family:inherit}
   .addrow button{background:var(--accent);color:#fff;padding:0 18px;font-size:16px}
 
-  .endbtn{position:sticky;bottom:10px;width:100%;background:var(--accent);color:#fff;
+  .endbtn{position:sticky;bottom:max(10px,env(safe-area-inset-bottom));width:100%;background:var(--accent);color:#fff;
     padding:16px;font-size:18px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.35);margin-top:6px}
   .endbtn:disabled{opacity:.4}
 
   .winbanner{background:linear-gradient(90deg,var(--gold),#ffd866);color:#5a4500;border-radius:14px;
     padding:14px 16px;font-weight:800;font-size:18px;text-align:center;margin-bottom:12px;
     box-shadow:0 6px 18px rgba(0,0,0,.25)}
-  .empty{opacity:.8;text-align:center;padding:30px 10px;font-size:15px;line-height:1.5}
+  .empty{opacity:.85;text-align:center;padding:30px 10px;font-size:15px;line-height:1.5}
   .hist{font-size:11px;color:#9a937e;margin-top:6px;word-break:break-word}
-  .footer{text-align:center;font-size:11px;opacity:.55;margin-top:18px}
+  .footer{text-align:center;font-size:11px;opacity:.55;margin-top:18px;line-height:1.6}
+
+  /* overlays */
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:60}
+  .overlay{position:fixed;inset:0;background:rgba(4,20,14,.72);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:70;padding:18px}
+  .overlay.show{display:flex}
+  .sheet{background:var(--paper);color:var(--ink);border-radius:20px;width:100%;max-width:520px;
+    max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper)}
+  .sheet-h h3{margin:0;font-size:18px}
+  .closex{width:34px;height:34px;border-radius:50%;background:#eee8da;color:#6b6450;font-size:16px}
+  .sheet-b{padding:16px 18px}
+
+  /* winner */
+  .wintrophy{font-size:54px;text-align:center;margin:6px 0 2px}
+  .winname{font-size:30px;font-weight:800;text-align:center;color:var(--accent)}
+  .winscore{font-size:15px;text-align:center;color:#7a735f;margin-bottom:14px}
+  .winrank{list-style:none;padding:0;margin:0 0 16px}
+  .winrank li{display:flex;justify-content:space-between;padding:9px 12px;border-radius:10px;font-weight:700;font-size:15px}
+  .winrank li:nth-child(odd){background:#f3eede}
+  .winbtns{display:flex;gap:8px}
+  .winbtns button{flex:1;padding:14px;font-size:15px}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-sub{background:#eee8da;color:#6b6450}
+
+  /* scoreboard */
+  .logtable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .logtable th,.logtable td{padding:8px 6px;text-align:center;font-size:14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .logtable th{font-size:12px;color:#8a8268;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--paper)}
+  .logtable td.rd{color:#9a937e;font-weight:700}
+  .logtable td.b{color:var(--bust);font-weight:800}
+  .logtable .f7{color:#caa400;margin-left:2px}
+  .logtable tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:800;font-size:16px;padding-top:11px}
+  .logwrap{overflow-x:auto}
+  .logempty{text-align:center;color:#9a937e;padding:24px 0;font-size:14px}
 </style>
 </head>
 <body>
+<canvas id="fx"></canvas>
 <div class="wrap">
   <header>
     <div class="brand">
@@ -104,12 +154,19 @@
       <span class="target">first to 200 wins</span>
     </div>
     <div class="hbtns">
-      <button class="ghost" id="undoBtn">Undo round</button>
-      <button class="ghost" id="resetBtn">New game</button>
+      <button class="iconbtn" id="soundBtn" title="Sound">🔊</button>
+      <button class="iconbtn" id="logBtn" title="Scoreboard">📊</button>
     </div>
   </header>
 
-  <div class="round-pill">Round <span id="roundNum">1</span></div>
+  <div class="toolbar">
+    <div class="round-pill">Round <span id="roundNum">1</span></div>
+    <span class="spacer"></span>
+    <button class="ghost" id="installBtn" hidden>📲 Install</button>
+    <button class="ghost" id="undoBtn" hidden>Undo</button>
+    <button class="ghost" id="resetBtn">New game</button>
+  </div>
+
   <div id="winWrap"></div>
 
   <div class="addrow">
@@ -121,7 +178,34 @@
 
   <button class="endbtn" id="endBtn">End round &amp; bank scores</button>
 
-  <div class="footer">Tap a player to enter their cards. Saved automatically on this computer.</div>
+  <div class="footer">
+    Tap a player to enter their cards. Saved automatically on this device.<br>
+    Add to your home screen for a full-screen app that works offline.
+  </div>
+</div>
+
+<!-- Winner overlay -->
+<div class="overlay" id="winOverlay">
+  <div class="sheet">
+    <div class="sheet-b">
+      <div class="wintrophy">🏆</div>
+      <div class="winname" id="winName"></div>
+      <div class="winscore" id="winScore"></div>
+      <ul class="winrank" id="winRank"></ul>
+      <div class="winbtns">
+        <button class="btn-sub" id="winClose">Keep playing</button>
+        <button class="btn-primary" id="winNew">New game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scoreboard overlay -->
+<div class="overlay" id="logOverlay">
+  <div class="sheet">
+    <div class="sheet-h"><h3>Scoreboard</h3><button class="closex" id="logClose">✕</button></div>
+    <div class="sheet-b"><div class="logwrap" id="logBody"></div></div>
+  </div>
 </div>
 
 <script>
@@ -130,18 +214,18 @@ const NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12];
 const MODS = [2,4,6,8,10];
 const LS = 'flip7-scorer-v1';
 
-let state = load() || { round:1, players:[], openId:null };
+let state = load() || { round:1, players:[], openId:null, muted:false };
+if(typeof state.muted !== 'boolean') state.muted = false;
 
 function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
 function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
 function uid(){ return 'p'+(state.players.reduce((m,p)=>Math.max(m,+p.id.slice(1)||0),0)+1); }
-
 function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false }; }
 
 function addPlayer(name){
   name = (name||'').trim(); if(!name) return;
   state.players.push({ id:uid(), name, total:0, rounds:[], draft:freshDraft() });
-  save(); render();
+  save(); render(); reqWake();
 }
 
 function roundScore(d){
@@ -155,11 +239,14 @@ function roundScore(d){
 
 function endRound(){
   if(!state.players.length) return;
-  // snapshot for undo
   state._undo = JSON.parse(JSON.stringify({ round:state.round, players:state.players }));
+  const hadWinner = state._undo.players.some(p=>p.total>=TARGET);
+  let flip7s = 0;
   state.players.forEach(p=>{
     const s = roundScore(p.draft);
-    p.rounds.push({ score:s, bust:p.draft.bust, flip7:p.draft.numbers.length>=7 });
+    const f7 = p.draft.numbers.length>=7 && !p.draft.bust;
+    if(f7) flip7s++;
+    p.rounds.push({ score:s, bust:p.draft.bust, flip7:f7 });
     p.total += s;
     p.draft = freshDraft();
   });
@@ -167,10 +254,14 @@ function endRound(){
   state.openId = null;
   save(); render();
   window.scrollTo({top:0,behavior:'smooth'});
+
+  const w = winner();
+  if(w && !hadWinner){ sfx('win'); confetti(180); showWin(w); }
+  else if(flip7s){ confetti(70); }
 }
 
 function undo(){
-  if(!state._undo){ return; }
+  if(!state._undo) return;
   state.round = state._undo.round;
   state.players = state._undo.players;
   state._undo = null;
@@ -186,12 +277,12 @@ function winner(){
 
 function render(){
   document.getElementById('roundNum').textContent = state.round;
-  document.getElementById('undoBtn').style.display = state._undo ? '' : 'none';
+  document.getElementById('undoBtn').hidden = !state._undo;
+  document.getElementById('soundBtn').textContent = state.muted ? '🔇' : '🔊';
 
-  // winner banner
   const w = winner();
-  const winWrap = document.getElementById('winWrap');
-  winWrap.innerHTML = w ? `<div class="winbanner">🏆 ${escapeHtml(w.name)} wins with ${w.total}!</div>` : '';
+  document.getElementById('winWrap').innerHTML = w
+    ? `<div class="winbanner">🏆 ${escapeHtml(w.name)} wins with ${w.total}!</div>` : '';
 
   const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
   const lead = ranked.length ? ranked[0].total : 0;
@@ -264,60 +355,190 @@ function calcText(d){
   return parts.join(' ');
 }
 
-function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ---- events ----
+/* ---------- winner overlay ---------- */
+function showWin(w){
+  const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
+  document.getElementById('winName').textContent = w.name;
+  document.getElementById('winScore').textContent = w.total + ' points';
+  document.getElementById('winRank').innerHTML = ranked.map((p,i)=>
+    `<li><span>${['🥇','🥈','🥉'][i]||((i+1)+'.')} ${escapeHtml(p.name)}</span><span>${p.total}</span></li>`).join('');
+  document.getElementById('winOverlay').classList.add('show');
+}
+
+/* ---------- scoreboard ---------- */
+function showLog(){
+  const n = state.players.reduce((m,p)=>Math.max(m,p.rounds.length),0);
+  const body = document.getElementById('logBody');
+  if(!state.players.length || n===0){
+    body.innerHTML = `<div class="logempty">No rounds banked yet.<br>Scores will appear here after you end a round.</div>`;
+  } else {
+    let head = '<th>Rd</th>'+state.players.map(p=>`<th>${escapeHtml(p.name)}</th>`).join('');
+    let rows = '';
+    for(let i=0;i<n;i++){
+      rows += `<tr><td class="rd">${i+1}</td>`+state.players.map(p=>{
+        const r = p.rounds[i];
+        if(!r) return '<td>·</td>';
+        if(r.bust) return '<td class="b">✕</td>';
+        return `<td>${r.score}${r.flip7?'<span class="f7">⚡</span>':''}</td>`;
+      }).join('')+'</tr>';
+    }
+    const tot = '<tr class="tot"><td>Σ</td>'+state.players.map(p=>`<td>${p.total}</td>`).join('')+'</tr>';
+    body.innerHTML = `<table class="logtable"><thead><tr>${head}</tr></thead><tbody>${rows}${tot}</tbody></table>`;
+  }
+  document.getElementById('logOverlay').classList.add('show');
+}
+
+/* ---------- sound + haptics ---------- */
+let actx = null;
+function audioCtx(){
+  if(state.muted) return null;
+  if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+  if(actx.state==='suspended') actx.resume();
+  return actx;
+}
+function beep(freq,start,dur,type,gain){
+  const ac = audioCtx(); if(!ac) return;
+  const t = ac.currentTime+start;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(ac.destination);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(gain||0.15,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.start(t); o.stop(t+dur+0.03);
+}
+function vibe(p){ if(navigator.vibrate){ try{ navigator.vibrate(p); }catch(e){} } }
+function sfx(name){
+  if(state.muted) return;
+  if(name==='bust'){ beep(190,0,0.16,'sawtooth',0.18); beep(120,0.11,0.22,'sawtooth',0.18); vibe(200); }
+  if(name==='flip7'){ [523,659,784,1047].forEach((f,i)=>beep(f,i*0.085,0.16,'triangle',0.16)); vibe([30,40,30,40]); }
+  if(name==='win'){ [523,659,784,1047,1319].forEach((f,i)=>beep(f,i*0.12,0.3,'triangle',0.2)); vibe([90,40,90,40,180]); }
+}
+
+/* ---------- wake lock (keep screen on) ---------- */
+let wakeLock = null;
+async function reqWake(){
+  try{
+    if('wakeLock' in navigator && state.players.length && !document.hidden){
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reqWake(); });
+
+/* ---------- confetti ---------- */
+const fx = document.getElementById('fx'), fctx = fx.getContext('2d');
+let parts = [], raf = null;
+function sizeFx(){ fx.width = innerWidth; fx.height = innerHeight; }
+addEventListener('resize', sizeFx); sizeFx();
+function confetti(count){
+  sizeFx();
+  const colors = ['#F85609','#f5c542','#2fae6a','#ffffff','#7b3ff2','#ff6a1a'];
+  for(let i=0;i<count;i++){
+    parts.push({ x:Math.random()*fx.width, y:-20-Math.random()*fx.height*0.3,
+      vx:(Math.random()-0.5)*7, vy:3+Math.random()*5, s:6+Math.random()*8,
+      r:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.34, c:colors[i%colors.length] });
+  }
+  if(!raf) raf = requestAnimationFrame(stepFx);
+}
+function stepFx(){
+  fctx.clearRect(0,0,fx.width,fx.height);
+  parts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.13; p.r+=p.vr;
+    fctx.save(); fctx.translate(p.x,p.y); fctx.rotate(p.r);
+    fctx.fillStyle=p.c; fctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); fctx.restore();
+  });
+  parts = parts.filter(p=>p.y < fx.height+40);
+  if(parts.length) raf = requestAnimationFrame(stepFx);
+  else { raf = null; fctx.clearRect(0,0,fx.width,fx.height); }
+}
+
+/* ---------- events ---------- */
 document.getElementById('addBtn').onclick = ()=>{
   const i = document.getElementById('nameInput'); addPlayer(i.value); i.value=''; i.focus();
 };
-document.getElementById('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ document.getElementById('addBtn').click(); }});
+document.getElementById('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('addBtn').click(); });
+
 document.getElementById('endBtn').onclick = ()=>{
+  reqWake();
   const anyScored = state.players.some(p=>roundScore(p.draft)>0 || p.draft.bust);
   if(!anyScored && !confirm('No scores entered this round. Bank a round of zeros anyway?')) return;
   endRound();
 };
 document.getElementById('undoBtn').onclick = undo;
 document.getElementById('resetBtn').onclick = ()=>{
-  if(confirm('Start a brand new game? This clears all scores.')){
-    state = { round:1, players:state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})), openId:null };
-    if(confirm('Keep the same players? OK = keep, Cancel = remove everyone.')){} else { state.players=[]; }
-    save(); render();
-  }
+  if(!confirm('Start a brand new game? This clears all scores.')) return;
+  const keep = state.players.length ? confirm('Keep the same players?  OK = keep them,  Cancel = remove everyone.') : false;
+  state = { round:1, muted:state.muted, openId:null,
+    players: keep ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})) : [] };
+  save(); render();
 };
+
+document.getElementById('soundBtn').onclick = ()=>{
+  state.muted = !state.muted; save(); render();
+  if(!state.muted) sfx('flip7'); // little confirmation chirp when unmuting
+};
+document.getElementById('logBtn').onclick = showLog;
+document.getElementById('logClose').onclick = ()=>document.getElementById('logOverlay').classList.remove('show');
+document.getElementById('winClose').onclick = ()=>document.getElementById('winOverlay').classList.remove('show');
+document.getElementById('winNew').onclick = ()=>{
+  document.getElementById('winOverlay').classList.remove('show');
+  document.getElementById('resetBtn').click();
+};
+[document.getElementById('logOverlay'),document.getElementById('winOverlay')].forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.classList.remove('show'); });
+});
 
 document.getElementById('players').addEventListener('click', e=>{
   const card = e.target.closest('.player'); if(!card) return;
   const p = state.players.find(x=>x.id===card.dataset.id); if(!p) return;
   const act = e.target.closest('[data-act]')?.dataset.act;
   const d = p.draft;
+  reqWake();
 
   if(act==='toggle'){ state.openId = state.openId===p.id ? null : p.id; save(); render(); return; }
   if(act==='num'){
     const n = +e.target.dataset.n;
+    const before = d.numbers.length;
     if(d.numbers.includes(n)) d.numbers = d.numbers.filter(x=>x!==n);
     else d.numbers.push(n);
-    if(d.numbers.length) d.bust=false;
+    if(d.numbers.length) d.bust = false;
+    if(before < 7 && d.numbers.length >= 7){ sfx('flip7'); confetti(50); }
   }
   if(act==='mod'){
     const m = +e.target.dataset.m;
     if(d.mods.includes(m)) d.mods = d.mods.filter(x=>x!==m); else d.mods.push(m);
   }
-  if(act==='x2'){ d.x2=!d.x2; }
-  if(act==='bust'){ d.bust=!d.bust; }
-  if(act==='clear'){ p.draft=freshDraft(); }
-  if(act==='rename'){
-    const nn = prompt('Rename player:', p.name);
-    if(nn && nn.trim()) p.name=nn.trim();
-  }
-  if(act==='del'){
-    if(confirm('Remove '+p.name+'?')){ state.players=state.players.filter(x=>x.id!==p.id); if(state.openId===p.id) state.openId=null; }
-  }
+  if(act==='x2'){ d.x2 = !d.x2; }
+  if(act==='bust'){ d.bust = !d.bust; if(d.bust) sfx('bust'); }
+  if(act==='clear'){ p.draft = freshDraft(); }
+  if(act==='rename'){ const nn = prompt('Rename player:', p.name); if(nn && nn.trim()) p.name = nn.trim(); }
+  if(act==='del'){ if(confirm('Remove '+p.name+'?')){ state.players = state.players.filter(x=>x.id!==p.id); if(state.openId===p.id) state.openId=null; } }
   save(); render();
 });
 
-// ensure drafts exist on load
+/* ---------- install prompt ---------- */
+let deferredPrompt = null;
+const installBtn = document.getElementById('installBtn');
+const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if(!standalone) installBtn.hidden = false;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt = e; installBtn.hidden = false; });
+window.addEventListener('appinstalled', ()=>{ installBtn.hidden = true; });
+installBtn.onclick = async ()=>{
+  if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.hidden = true; }
+  else { alert('Add Flip 7 to your home screen:\n\n• iPhone / iPad (Safari): tap the Share button, then “Add to Home Screen”.\n\n• Android (Chrome): open the ⋮ menu, then “Install app” / “Add to Home screen”.'); }
+};
+
+/* ---------- service worker (offline) ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}
+
+/* ---------- init ---------- */
 state.players.forEach(p=>{ if(!p.draft) p.draft=freshDraft(); });
 render();
+reqWake();
 </script>
 </body>
 </html>

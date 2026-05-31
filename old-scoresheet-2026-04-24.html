@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flip 7 Scoresheet</title>
+<style>
+  :root {
+    --bg: #0c1220;
+    --panel: #151c2e;
+    --border: #243049;
+    --text: #f5f7fb;
+    --muted: #8ea0bf;
+    --accent: #ff4c00;
+    --win: #ffd84d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  header { padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+  h1 span { color: var(--accent); }
+  .target { color: var(--muted); font-size: 13px; }
+  main { padding: 16px; max-width: 1200px; margin: 0 auto; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  button, input[type=text] {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 15px;
+  }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.ghost { background: transparent; }
+  button:hover { filter: brightness(1.1); }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  th, td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+  th { background: var(--panel); font-weight: 600; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  th.player, td.player { text-align: left; padding-left: 14px; }
+  td input.score {
+    width: 72px; padding: 8px; text-align: center;
+    background: #0a1020; border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; font-size: 16px;
+  }
+  td input.score:focus { outline: none; border-color: var(--accent); }
+  .total { font-size: 22px; font-weight: 700; }
+  .total.win { color: var(--win); }
+  .name-input { background: transparent; border: none; color: var(--text); font-weight: 600; font-size: 16px; width: 130px; padding: 4px; text-align: center; }
+  .name-input:focus { outline: 1px solid var(--border); border-radius: 4px; }
+  .remove { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px 8px; }
+  .remove:hover { color: #ff5a6e; }
+  .footer-note { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+  .winner-banner { background: var(--win); color: #1a1300; padding: 12px; text-align: center; font-weight: 700; border-radius: 10px; margin-bottom: 14px; display: none; }
+  .winner-banner.show { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Flip <span>7</span> Scoresheet</h1>
+  <div class="target">First to 200 wins</div>
+</header>
+<main>
+  <div id="banner" class="winner-banner"></div>
+  <div class="controls">
+    <button class="primary" id="addPlayer">+ Add Player</button>
+    <button id="addRound">+ Add Round</button>
+    <button class="ghost" id="reset">Reset Game</button>
+  </div>
+  <div class="table-wrap">
+    <table id="sheet">
+      <thead><tr id="headerRow"></tr></thead>
+      <tbody id="body"></tbody>
+      <tfoot><tr id="totalRow"></tr></tfoot>
+    </table>
+  </div>
+  <p class="footer-note">Tip: Tab through cells to enter scores quickly. Saved automatically in this browser.</p>
+</main>
+
+<script>
+const STORAGE_KEY = 'flip7-scoresheet-v1';
+const TARGET = 200;
+
+let state = load() || {
+  players: [{ name: 'Player 1' }, { name: 'Player 2' }],
+  rounds: [[null, null]],
+};
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function totals() {
+  return state.players.map((_, p) =>
+    state.rounds.reduce((sum, r) => sum + (Number(r[p]) || 0), 0)
+  );
+}
+
+function escapeAttr(s) { return String(s).replace(/"/g, '&quot;'); }
+
+function updateTotals() {
+  const t = totals();
+  const max = Math.max(...t, 0);
+  const someoneWon = max >= TARGET;
+  document.querySelectorAll('#totalRow .total').forEach((node, i) => {
+    node.textContent = t[i];
+    node.classList.toggle('win', someoneWon && t[i] === max);
+  });
+  const banner = document.getElementById('banner');
+  if (someoneWon) {
+    const winners = state.players.filter((_, i) => t[i] === max).map(p => p.name);
+    banner.textContent = '🏆 ' + winners.join(' & ') + ' wins with ' + max + '!';
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function render() {
+  const header = document.getElementById('headerRow');
+  const body = document.getElementById('body');
+  const totalRow = document.getElementById('totalRow');
+
+  header.innerHTML = '<th class="player">Round</th>' +
+    state.players.map((p, i) =>
+      '<th>' +
+        '<input class="name-input" value="' + escapeAttr(p.name) + '" data-player="' + i + '" />' +
+        (state.players.length > 1 ? '<button class="remove" data-remove-player="' + i + '" title="Remove player">×</button>' : '') +
+      '</th>'
+    ).join('');
+
+  body.innerHTML = state.rounds.map((row, r) =>
+    '<tr>' +
+      '<td class="player">Round ' + (r + 1) +
+        (state.rounds.length > 1 ? ' <button class="remove" data-remove-round="' + r + '" title="Remove round">×</button>' : '') +
+      '</td>' +
+      row.map((v, p) =>
+        '<td><input class="score" type="number" inputmode="numeric" data-r="' + r + '" data-p="' + p + '" value="' + (v ?? '') + '" /></td>'
+      ).join('') +
+    '</tr>'
+  ).join('');
+
+  totalRow.innerHTML = '<th class="player">Total</th>' +
+    state.players.map(() => '<th><div class="total">0</div></th>').join('');
+
+  attachHandlers();
+  updateTotals();
+  save();
+}
+
+function attachHandlers() {
+  document.querySelectorAll('input.score').forEach(el => {
+    el.oninput = e => {
+      const r = +e.target.dataset.r, p = +e.target.dataset.p;
+      const v = e.target.value === '' ? null : Number(e.target.value);
+      state.rounds[r][p] = v;
+      updateTotals();
+      save();
+    };
+  });
+  document.querySelectorAll('.name-input').forEach(el => {
+    el.oninput = e => {
+      state.players[+e.target.dataset.player].name = e.target.value;
+      save();
+      updateTotals();
+    };
+  });
+  document.querySelectorAll('[data-remove-player]').forEach(btn => {
+    btn.onclick = () => {
+      const i = +btn.dataset.removePlayer;
+      if (state.players.length <= 1) return;
+      state.players.splice(i, 1);
+      state.rounds.forEach(r => r.splice(i, 1));
+      render();
+    };
+  });
+  document.querySelectorAll('[data-remove-round]').forEach(btn => {
+    btn.onclick = () => {
+      const i = +btn.dataset.removeRound;
+      if (state.rounds.length <= 1) return;
+      state.rounds.splice(i, 1);
+      render();
+    };
+  });
+}
+
+document.getElementById('addPlayer').onclick = () => {
+  state.players.push({ name: 'Player ' + (state.players.length + 1) });
+  state.rounds.forEach(r => r.push(null));
+  render();
+};
+document.getElementById('addRound').onclick = () => {
+  state.rounds.push(state.players.map(() => null));
+  render();
+};
+document.getElementById('reset').onclick = () => {
+  if (!confirm('Reset the entire game?')) return;
+  state = { players: [{ name: 'Player 1' }, { name: 'Player 2' }], rounds: [[null, null]] };
+  render();
+};
+
+render();
+</script>
+</body>
+</html>

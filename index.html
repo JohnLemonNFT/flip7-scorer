@@ -143,6 +143,19 @@
   .logtable tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:800;font-size:16px;padding-top:11px}
   .logwrap{overflow-x:auto}
   .logempty{text-align:center;color:#9a937e;padding:24px 0;font-size:14px}
+
+  /* custom modal (replaces native confirm/prompt/alert) */
+  .modal-sheet{max-width:420px}
+  .modal-title{font-size:20px;font-weight:800;margin-bottom:6px}
+  .modal-msg{font-size:15px;color:#6b6450;line-height:1.5;margin-bottom:15px}
+  .modal-msg b{color:var(--ink)}
+  .modal-input{width:100%;padding:13px 14px;border-radius:12px;border:2px solid #e3dcca;
+    font-size:16px;font-family:inherit;margin-bottom:15px;background:#fff;color:var(--ink)}
+  .modal-input:focus{outline:none;border-color:var(--accent)}
+  .modal-btns{display:flex;gap:8px}
+  .modal-btns.stack{flex-direction:column}
+  .mbtn{flex:1;padding:14px;font-size:15px;border-radius:12px;font-weight:700}
+  .btn-danger{background:var(--bust);color:#fff}
 </style>
 </head>
 <body>
@@ -205,6 +218,18 @@
   <div class="sheet">
     <div class="sheet-h"><h3>Scoreboard</h3><button class="closex" id="logClose">✕</button></div>
     <div class="sheet-b"><div class="logwrap" id="logBody"></div></div>
+  </div>
+</div>
+
+<!-- Generic modal (confirm / prompt / alert) -->
+<div class="overlay" id="modalOverlay">
+  <div class="sheet modal-sheet">
+    <div class="sheet-b">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-msg" id="modalMsg"></div>
+      <input class="modal-input" id="modalInput" maxlength="16" autocomplete="off">
+      <div class="modal-btns" id="modalBtns"></div>
+    </div>
   </div>
 </div>
 
@@ -357,6 +382,68 @@ function calcText(d){
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+/* ---------- custom modal (replaces native confirm/prompt/alert) ---------- */
+function modal({ title='', message='', html=false, input=null, stack=false, buttons=[] }){
+  return new Promise(resolve=>{
+    const ov = document.getElementById('modalOverlay');
+    const elT = document.getElementById('modalTitle');
+    const elM = document.getElementById('modalMsg');
+    const elI = document.getElementById('modalInput');
+    const elB = document.getElementById('modalBtns');
+
+    elT.textContent = title;
+    if(message){ elM.style.display=''; if(html) elM.innerHTML=message; else elM.textContent=message; }
+    else { elM.style.display='none'; elM.textContent=''; }
+    if(input){ elI.style.display=''; elI.value=input.value||''; elI.placeholder=input.placeholder||''; }
+    else { elI.style.display='none'; elI.value=''; }
+
+    elB.className = 'modal-btns'+(stack?' stack':'');
+    elB.innerHTML = '';
+    const primary = buttons.find(b=>b.style==='primary'||b.style==='danger') || buttons[buttons.length-1];
+    const valOf = b => b.value==='__INPUT__' ? elI.value.trim() : b.value;
+
+    function close(v){
+      ov.classList.remove('show');
+      ov.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey);
+      resolve(v);
+    }
+    function onBackdrop(e){ if(e.target===ov) close(null); }
+    function onKey(e){
+      if(e.key==='Escape') close(null);
+      else if(e.key==='Enter' && primary){ e.preventDefault(); close(valOf(primary)); }
+    }
+
+    buttons.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.textContent = b.label;
+      btn.className = 'mbtn '+(b.style==='primary'?'btn-primary':b.style==='danger'?'btn-danger':'btn-sub');
+      btn.onclick = ()=>close(valOf(b));
+      elB.appendChild(btn);
+    });
+
+    ov.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onKey);
+    ov.classList.add('show');
+    if(input) setTimeout(()=>{ elI.focus(); elI.select(); }, 60);
+  });
+}
+function uiConfirm({ title, message='', confirmText='OK', cancelText='Cancel', danger=false }){
+  return modal({ title, message, buttons:[
+    { label:cancelText, value:false, style:'sub' },
+    { label:confirmText, value:true, style:danger?'danger':'primary' }
+  ]});
+}
+function uiPrompt({ title, message='', value='', confirmText='Save', placeholder='' }){
+  return modal({ title, message, input:{value,placeholder}, buttons:[
+    { label:'Cancel', value:null, style:'sub' },
+    { label:confirmText, value:'__INPUT__', style:'primary' }
+  ]});
+}
+function uiAlert({ title, message, okText='Got it' }){
+  return modal({ title, message, html:true, buttons:[{ label:okText, value:true, style:'primary' }] });
+}
+
 /* ---------- winner overlay ---------- */
 function showWin(w){
   const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
@@ -460,18 +547,34 @@ document.getElementById('addBtn').onclick = ()=>{
 };
 document.getElementById('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('addBtn').click(); });
 
-document.getElementById('endBtn').onclick = ()=>{
+document.getElementById('endBtn').onclick = async ()=>{
   reqWake();
   const anyScored = state.players.some(p=>roundScore(p.draft)>0 || p.draft.bust);
-  if(!anyScored && !confirm('No scores entered this round. Bank a round of zeros anyway?')) return;
+  if(!anyScored){
+    const ok = await uiConfirm({ title:'No scores entered', message:'Bank a round of zeros for everyone anyway?', confirmText:'Bank zeros' });
+    if(!ok) return;
+  }
   endRound();
 };
 document.getElementById('undoBtn').onclick = undo;
-document.getElementById('resetBtn').onclick = ()=>{
-  if(!confirm('Start a brand new game? This clears all scores.')) return;
-  const keep = state.players.length ? confirm('Keep the same players?  OK = keep them,  Cancel = remove everyone.') : false;
+document.getElementById('resetBtn').onclick = async ()=>{
+  const hasPlayers = state.players.length > 0;
+  const choice = await modal({
+    title:'Start a new game?',
+    message:'This clears all scores for a fresh game.',
+    stack:true,
+    buttons: hasPlayers ? [
+      { label:'New game — keep players', value:'keep', style:'primary' },
+      { label:'New game — remove everyone', value:'wipe', style:'danger' },
+      { label:'Cancel', value:null, style:'sub' }
+    ] : [
+      { label:'Start new game', value:'wipe', style:'primary' },
+      { label:'Cancel', value:null, style:'sub' }
+    ]
+  });
+  if(!choice) return;
   state = { round:1, muted:state.muted, openId:null,
-    players: keep ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})) : [] };
+    players: choice==='keep' ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft()})) : [] };
   save(); render();
 };
 
@@ -513,10 +616,23 @@ document.getElementById('players').addEventListener('click', e=>{
   if(act==='x2'){ d.x2 = !d.x2; }
   if(act==='bust'){ d.bust = !d.bust; if(d.bust) sfx('bust'); }
   if(act==='clear'){ p.draft = freshDraft(); }
-  if(act==='rename'){ const nn = prompt('Rename player:', p.name); if(nn && nn.trim()) p.name = nn.trim(); }
-  if(act==='del'){ if(confirm('Remove '+p.name+'?')){ state.players = state.players.filter(x=>x.id!==p.id); if(state.openId===p.id) state.openId=null; } }
+  if(act==='rename'){ doRename(p); return; }
+  if(act==='del'){ doDelete(p); return; }
   save(); render();
 });
+
+async function doRename(p){
+  const nn = await uiPrompt({ title:'Rename player', value:p.name, placeholder:'Player name', confirmText:'Save' });
+  if(nn && nn.trim()){ p.name = nn.trim(); save(); render(); }
+}
+async function doDelete(p){
+  const ok = await uiConfirm({ title:'Remove player?', message:`Remove ${p.name} from the game? Their scores will be lost.`, confirmText:'Remove', danger:true });
+  if(ok){
+    state.players = state.players.filter(x=>x.id!==p.id);
+    if(state.openId===p.id) state.openId = null;
+    save(); render();
+  }
+}
 
 /* ---------- install prompt ---------- */
 let deferredPrompt = null;
@@ -527,7 +643,7 @@ window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred
 window.addEventListener('appinstalled', ()=>{ installBtn.hidden = true; });
 installBtn.onclick = async ()=>{
   if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.hidden = true; }
-  else { alert('Add Flip 7 to your home screen:\n\n• iPhone / iPad (Safari): tap the Share button, then “Add to Home Screen”.\n\n• Android (Chrome): open the ⋮ menu, then “Install app” / “Add to Home screen”.'); }
+  else { await uiAlert({ title:'📲 Add to Home Screen', message:'<b>iPhone / iPad (Safari):</b> tap the Share button, then “Add to Home Screen”.<br><br><b>Android (Chrome):</b> open the ⋮ menu, then “Install app”.' }); }
 };
 
 /* ---------- service worker (offline) ---------- */

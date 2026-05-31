@@ -1,5 +1,13 @@
 # Flip 7 Scorer — Feature Plan
 
+## STATUS: ✅ All 4 shipped & verified live (2026-05-31)
+- Settings + custom target (100/150/200/custom) — tested
+- Game history + all-time leaderboard (separate localStorage) — tested
+- End-of-game highlights (biggest round / most Flip 7s / most busts) — tested
+- Player colors + avatar chips + medals — tested
+- Future idea: "Flip 7 with a Vengeance" mode (negative scores, steal points) — needs its own card set, deferred.
+
+
 ## Context
 - Official rules confirmed: scoring is correct; first to 200 wins; no separate rule variants.
 - Practical "variation" = configurable winning score.

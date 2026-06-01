@@ -9,7 +9,23 @@
   Vengeance adds 13 + Lucky 13 cards, minus cards (−2..−10), Unlucky 7 reset, ± steal/penalty box,
   Flip 7 choice (+15 self / −15 rival), Brutal toggle (floor-at-0 vs negative). Unit + browser tested.
   Note: table-resolved actions (Steal/Swap/Discard/Flip Four/Just One More) net via the ± box by design.
-  Minus-card denominations assumed −2..−10 (mirror of +mods); ± box covers any oddballs (e.g. divide).
+  Minus-card denominations assumed −2..−10 (mirror of +mods); ± box covers any oddballs.
+
+## Vengeance rules research (2026-05-31) — confirmed vs best-guess
+CONFIRMED from official FAQ / reviews / retail (The Op, geekyhobbies, happypiranha, meeplemountain, BGG):
+- 108 cards. Number cards now go to 13 (thirteen 13s … one 1, single 0). ✅ 13 tile added.
+- 5 new action cards: Steal, Swap, Discard, Just One More, Flip Four — all TABLE-resolved → captured by ± box. ✅
+- 3 special number cards:
+  - Lucky 13 = keep a 2nd 13 (3rd busts). ✅ toggle
+  - Unlucky 7 = discard all, keep only the 7. ✅ button
+  - "0" = score 0 for the round UNLESS you Flip 7. ✅ modelled + visible note
+- ÷2 (Divide) modifier halves number total. ✅ added (floor on odd).
+- x2 doubles number total only. ✅ (base behaviour)
+- Flip 7 → +15 self OR −15 a rival. ✅ toggle
+- Score floor at 0 official; Brutal = negatives allowed. ✅ toggle
+BEST-GUESS (not published anywhere public; physical cards / paywalled PDF only):
+- Exact minus-card denominations → using −2,−4,−6,−8,−10 (mirrors + cards, includes the one confirmed −10).
+  If real set differs, the ± box absorbs it, so scores can't be wrong.
 
 
 ## Context

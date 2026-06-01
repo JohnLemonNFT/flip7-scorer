@@ -79,6 +79,7 @@
   .mod{padding:9px 13px;border-radius:10px;background:#fff;border:2px solid #e3dcca;font-size:15px;font-weight:800;color:var(--ink)}
   .mod.on{background:var(--accent);color:#fff;border-color:var(--accent)}
   .mod.x2.on{background:var(--purple);border-color:var(--purple)}
+  .mod.div2.on{background:#1f8fd6;color:#fff;border-color:#1f8fd6}
   .mod.neg.on{background:var(--bust);color:#fff;border-color:var(--bust)}
   .mod.luck.on{background:var(--teal);color:#fff;border-color:var(--teal)}
   .mod.f7{border-style:dashed}
@@ -340,7 +341,7 @@ function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
 function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HLS)) || []; }catch(e){ return []; } }
 function saveHistoryRecord(rec){ const h = loadHistory(); h.push(rec); try{ localStorage.setItem(HLS, JSON.stringify(h)); }catch(e){} }
 function uid(){ return 'p'+(state.players.reduce((m,p)=>Math.max(m,+p.id.slice(1)||0),0)+1); }
-function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false, lucky13:false, negmods:[], adjust:0, noF7:false }; }
+function freshDraft(){ return { numbers:[], mods:[], x2:false, div2:false, bust:false, lucky13:false, negmods:[], adjust:0, noF7:false }; }
 function initial(name){ return (String(name).trim()[0] || '?').toUpperCase(); }
 function isVeng(){ return state.mode==='vengeance'; }
 function f7count(d){ return d.numbers.length + (d.lucky13?1:0); }
@@ -361,6 +362,7 @@ function roundScore(d){
   if(d.bust) return adj;                          // busted: only an external steal/penalty can still apply
   let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13 ? 13 : 0);
   if(d.x2) numSum *= 2;
+  if(d.div2) numSum = Math.floor(numSum / 2);
   const pos = d.mods.reduce((a,b)=>a+b,0);
   const neg = (d.negmods||[]).reduce((a,b)=>a+b,0);
   const bonus = (f7count(d)>=7 && !d.noF7) ? 15 : 0;
@@ -456,6 +458,7 @@ function render(){
     const vengBlock = isVeng() ? `
         <div class="mods" style="margin-top:8px">
           <div class="mod luck ${d.lucky13?'on':''}" data-act="lucky13">Lucky 13</div>
+          <div class="mod div2 ${d.div2?'on':''}" data-act="div2">÷2</div>
           ${has7 ? `<div class="mod f7 ${!d.noF7?'on':''}" data-act="f7toggle">${!d.noF7?'Flip 7: +15 to me':'Flip 7: −15 a rival'}</div>` : ''}
         </div>
         <h4>Minus cards</h4>
@@ -519,7 +522,10 @@ function calcText(d){
   let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13?13:0);
   if(!numSum && !d.mods.length && !(d.negmods||[]).length && !adj) return 'No cards yet';
   const parts = [];
-  parts.push(d.x2 ? `(${numSum})×2` : `${numSum}`);
+  let lbl = `${numSum}`;
+  if(d.x2) lbl = `(${lbl})×2`;
+  if(d.div2) lbl = `(${lbl})÷2`;
+  parts.push(lbl);
   d.mods.forEach(m=>parts.push('+'+m));
   (d.negmods||[]).forEach(m=>parts.push('−'+m));
   if(f7count(d)>=7 && !d.noF7) parts.push('+15');
@@ -863,6 +869,7 @@ document.getElementById('players').addEventListener('click', e=>{
     if(d.mods.includes(m)) d.mods = d.mods.filter(x=>x!==m); else d.mods.push(m);
   }
   if(act==='x2'){ d.x2 = !d.x2; }
+  if(act==='div2'){ d.div2 = !d.div2; }
   if(act==='lucky13'){
     const before = f7count(d);
     d.lucky13 = !d.lucky13; if(d.lucky13) d.bust = false;

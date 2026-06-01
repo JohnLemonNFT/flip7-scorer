@@ -360,6 +360,8 @@ function addPlayer(name){
 function roundScore(d){
   const adj = d.adjust || 0;
   if(d.bust) return adj;                          // busted: only an external steal/penalty can still apply
+  // Vengeance "0" card: you score 0 for the round unless you complete a Flip 7.
+  if(isVeng() && d.numbers.includes(0) && f7count(d) < 7) return adj;
   let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13 ? 13 : 0);
   if(d.x2) numSum *= 2;
   if(d.div2) numSum = Math.floor(numSum / 2);
@@ -519,6 +521,8 @@ function rankOf(ranked,p){ return ranked.findIndex(x=>x.id===p.id)+1; }
 function calcText(d){
   const adj = d.adjust || 0;
   if(d.bust) return adj ? `Busted, ${adj>0?'+':'−'}${Math.abs(adj)}` : 'Busted this round';
+  if(isVeng() && d.numbers.includes(0) && f7count(d) < 7)
+    return adj ? `0 card voids the round, ${adj>0?'+':'−'}${Math.abs(adj)}` : '0 card — round scores 0 unless you Flip 7';
   let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13?13:0);
   if(!numSum && !d.mods.length && !(d.negmods||[]).length && !adj) return 'No cards yet';
   const parts = [];

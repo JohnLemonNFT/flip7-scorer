@@ -1,5 +1,5 @@
 // Flip 7 Scorer service worker — offline support
-const CACHE = 'flip7-v2';
+const CACHE = 'flip7-v3';
 const ASSETS = [
   '/',
   '/index.html',

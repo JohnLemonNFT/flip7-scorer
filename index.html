@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Flip 7 Scorer</title>
-<meta name="description" content="A quick scorekeeper for the card game Flip 7.">
+<meta name="description" content="A quick scorekeeper for the card game Flip 7 (Classic & With a Vengeance).">
 <meta name="theme-color" content="#0c5a3f">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -19,7 +19,7 @@
     --felt:#0c5a3f; --felt2:#0a4a34;
     --ink:#0d1117; --paper:#fbf7ee;
     --accent:#F85609; --gold:#f5c542;
-    --bust:#d6453a; --good:#2fae6a; --purple:#7b3ff2;
+    --bust:#d6453a; --good:#2fae6a; --purple:#7b3ff2; --teal:#0d9488;
     --line:rgba(0,0,0,.12);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -48,6 +48,7 @@
   .toolbar .spacer{flex:1}
   .round-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);
     padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700}
+  .veng-pill{background:var(--bust);color:#fff}
 
   .player{background:var(--paper);color:var(--ink);border-radius:16px;margin-bottom:10px;
     box-shadow:0 6px 18px rgba(0,0,0,.25);overflow:hidden}
@@ -78,6 +79,18 @@
   .mod{padding:9px 13px;border-radius:10px;background:#fff;border:2px solid #e3dcca;font-size:15px;font-weight:800;color:var(--ink)}
   .mod.on{background:var(--accent);color:#fff;border-color:var(--accent)}
   .mod.x2.on{background:var(--purple);border-color:var(--purple)}
+  .mod.neg.on{background:var(--bust);color:#fff;border-color:var(--bust)}
+  .mod.luck.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .mod.f7{border-style:dashed}
+  .mod.f7.on{background:var(--gold);color:#5a4500;border-color:var(--gold);border-style:solid}
+
+  .adjrow{display:flex;gap:8px;align-items:center}
+  .adjbtn{width:56px;padding:11px 0;border-radius:10px;background:#eee8da;color:#6b6450;font-size:17px}
+  .adj-input{flex:1;text-align:center;padding:11px;border-radius:10px;border:2px solid #e3dcca;
+    font-size:17px;font-family:inherit;font-weight:800;color:var(--ink);background:#fff;min-width:0}
+  .adj-input:focus{outline:none;border-color:var(--accent)}
+  .vhint{font-size:11px;color:#9a937e;margin-top:6px;line-height:1.4}
+  .unluckybtn{width:100%;margin-top:11px;padding:11px;border-radius:11px;background:#f5e6cf;color:#8a5a00;font-size:14px}
 
   .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;
     background:#f3eede;border-radius:12px;padding:11px 13px}
@@ -86,6 +99,7 @@
     padding:2px 7px;border-radius:999px;margin-left:6px}
   .roundscore{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
   .roundscore.bust{color:var(--bust)}
+  .roundscore.neg{color:var(--bust)}
 
   .panelbtns{display:flex;gap:8px;margin-top:11px}
   .bustbtn{flex:1;padding:11px;border-radius:11px;background:#fbeae8;color:var(--bust);border:2px solid #f3c9c4;font-size:14px}
@@ -139,10 +153,9 @@
   .btn-primary{background:var(--accent);color:#fff}
   .btn-sub{background:#eee8da;color:#6b6450}
 
-  /* color dot */
   .dot{display:inline-block;width:11px;height:11px;border-radius:50%;flex:0 0 auto}
 
-  /* scoreboard + leaderboard tables */
+  /* scoreboard + leaderboard */
   .logtable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   .logtable th,.logtable td{padding:8px 6px;text-align:center;font-size:14px;border-bottom:1px solid var(--line);white-space:nowrap}
   .logtable th{font-size:12px;color:#8a8268;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--paper)}
@@ -155,20 +168,21 @@
   .logwrap{overflow-x:auto}
   .logempty{text-align:center;color:#9a937e;padding:24px 0;font-size:14px;line-height:1.5}
 
-  /* past games */
   .gamecard{background:#f3eede;border-radius:12px;padding:11px 13px;margin-bottom:8px}
   .gc-h{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
   .gc-d{font-weight:600;font-size:12px;color:#9a937e}
   .gc-s{font-size:13px;color:#6b6450;margin-top:4px}
+  .gc-mode{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#b06a00}
 
-  /* segmented control (settings) */
+  /* segmented control */
   .seg{display:flex;gap:6px;margin-bottom:6px}
   .seg button{flex:1;padding:11px 6px;border-radius:10px;background:#fff;border:2px solid #e3dcca;
     font-weight:800;color:var(--ink);font-size:14px}
   .seg button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  #modeSeg button.on[data-m="vengeance"]{background:var(--bust);border-color:var(--bust)}
   .set-note{font-size:12px;color:#9a937e;margin:2px 0 4px}
 
-  /* custom modal (replaces native confirm/prompt/alert) */
+  /* modal */
   .modal-sheet{max-width:420px}
   .modal-title{font-size:20px;font-weight:800;margin-bottom:6px}
   .modal-msg{font-size:15px;color:#6b6450;line-height:1.5;margin-bottom:15px}
@@ -199,6 +213,7 @@
 
   <div class="toolbar">
     <div class="round-pill">Round <span id="roundNum">1</span></div>
+    <div class="round-pill veng-pill" id="vengPill" hidden>⚔️ Vengeance</div>
     <span class="spacer"></span>
     <button class="ghost" id="installBtn" hidden>📲 Install</button>
     <button class="ghost" id="undoBtn" hidden>Undo</button>
@@ -260,6 +275,22 @@
   <div class="sheet">
     <div class="sheet-h"><h3>Settings</h3><button class="closex" id="setClose">✕</button></div>
     <div class="sheet-b">
+      <h4>Game mode</h4>
+      <div class="seg" id="modeSeg">
+        <button data-m="classic">Classic</button>
+        <button data-m="vengeance">Vengeance</button>
+      </div>
+      <p class="set-note">Vengeance adds the 13 &amp; Lucky 13 cards, minus cards, Unlucky 7, a ± steal/penalty box, and the Flip 7 choice.</p>
+
+      <div id="brutalWrap" style="display:none">
+        <h4>Brutal mode</h4>
+        <div class="seg" id="brutalSeg">
+          <button data-b="off">Off</button>
+          <button data-b="on">On</button>
+        </div>
+        <p class="set-note">Off = totals floor at 0 (official). On = totals can go negative.</p>
+      </div>
+
       <h4>Winning score</h4>
       <div class="seg" id="targetSeg">
         <button data-t="100">100</button>
@@ -269,6 +300,7 @@
       </div>
       <input class="modal-input" id="targetCustom" type="number" min="1" max="9999" inputmode="numeric" placeholder="Custom target" style="display:none;margin-top:8px">
       <p class="set-note">Official Flip 7 plays to 200. Lower it for a quicker game.</p>
+
       <h4>Sound &amp; haptics</h4>
       <div class="seg" id="soundSeg">
         <button data-s="on">On</button>
@@ -293,21 +325,25 @@
 
 <script>
 const NUMBERS = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+const NUMBERS_V = [0,1,2,3,4,5,6,7,8,9,10,11,12,13];
 const MODS = [2,4,6,8,10];
+const NEGMODS = [2,4,6,8,10];
 const LS = 'flip7-scorer-v1';
 const HLS = 'flip7-history-v1';
 const PRESETS = [100,150,200];
 const PALETTE = ['#F85609','#2fae6a','#7b3ff2','#e0397a','#1f8fd6','#e0a000','#0d9488','#d6453a','#5b6ef5','#b45309'];
 
-let state = load() || { round:1, players:[], openId:null, muted:false, target:200 };
+let state = load() || { round:1, players:[], openId:null, muted:false, target:200, mode:'classic', brutal:false };
 
 function load(){ try{ return JSON.parse(localStorage.getItem(LS)); }catch(e){ return null; } }
 function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
 function loadHistory(){ try{ return JSON.parse(localStorage.getItem(HLS)) || []; }catch(e){ return []; } }
 function saveHistoryRecord(rec){ const h = loadHistory(); h.push(rec); try{ localStorage.setItem(HLS, JSON.stringify(h)); }catch(e){} }
 function uid(){ return 'p'+(state.players.reduce((m,p)=>Math.max(m,+p.id.slice(1)||0),0)+1); }
-function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false }; }
+function freshDraft(){ return { numbers:[], mods:[], x2:false, bust:false, lucky13:false, negmods:[], adjust:0, noF7:false }; }
 function initial(name){ return (String(name).trim()[0] || '?').toUpperCase(); }
+function isVeng(){ return state.mode==='vengeance'; }
+function f7count(d){ return d.numbers.length + (d.lucky13?1:0); }
 function pickColor(){
   const used = new Set(state.players.map(p=>p.color));
   return PALETTE.find(c=>!used.has(c)) || PALETTE[state.players.length % PALETTE.length];
@@ -319,13 +355,16 @@ function addPlayer(name){
   save(); render(); reqWake();
 }
 
+// Works for both modes; in Classic the vengeance fields stay at defaults so it reduces to the base rules.
 function roundScore(d){
-  if(d.bust) return 0;
-  let numSum = d.numbers.reduce((a,b)=>a+b,0);
+  const adj = d.adjust || 0;
+  if(d.bust) return adj;                          // busted: only an external steal/penalty can still apply
+  let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13 ? 13 : 0);
   if(d.x2) numSum *= 2;
-  let mods = d.mods.reduce((a,b)=>a+b,0);
-  let bonus = d.numbers.length>=7 ? 15 : 0;
-  return numSum + mods + bonus;
+  const pos = d.mods.reduce((a,b)=>a+b,0);
+  const neg = (d.negmods||[]).reduce((a,b)=>a+b,0);
+  const bonus = (f7count(d)>=7 && !d.noF7) ? 15 : 0;
+  return numSum + pos - neg + bonus + adj;
 }
 
 function endRound(){
@@ -335,10 +374,11 @@ function endRound(){
   let flip7s = 0;
   state.players.forEach(p=>{
     const s = roundScore(p.draft);
-    const f7 = p.draft.numbers.length>=7 && !p.draft.bust;
+    const f7 = f7count(p.draft)>=7 && !p.draft.bust;
     if(f7) flip7s++;
     p.rounds.push({ score:s, bust:p.draft.bust, flip7:f7 });
     p.total += s;
+    if(isVeng() && !state.brutal && p.total < 0) p.total = 0;   // floor at 0 unless Brutal
     p.draft = freshDraft();
   });
   state.round++;
@@ -351,6 +391,7 @@ function endRound(){
     saveHistoryRecord({
       date: Date.now(),
       target: state.target,
+      mode: state.mode,
       rounds: state.round - 1,
       winner: w.name,
       players: state.players.map(p=>({
@@ -381,6 +422,7 @@ function winner(){
 function render(){
   document.getElementById('roundNum').textContent = state.round;
   document.getElementById('undoBtn').hidden = !state._undo;
+  document.getElementById('vengPill').hidden = !isVeng();
   document.getElementById('targetSub').textContent = `first to ${state.target} wins`;
 
   const w = winner();
@@ -398,16 +440,37 @@ function render(){
   }
   document.getElementById('endBtn').disabled = false;
 
+  const nums = isVeng() ? NUMBERS_V : NUMBERS;
+
   root.innerHTML = state.players.map(p=>{
     const d = p.draft, s = roundScore(d), open = state.openId===p.id;
     const rank = rankOf(ranked,p);
     const medal = (rank<=3 && p.total>0 && state.players.length>1) ? ['🥇','🥈','🥉'][rank-1] : '';
     const winClass = (w && w.id===p.id) ? 'win' : '';
     const thisLabel = d.bust ? '<b class="bust">BUST</b>' : `<b>${s}</b>`;
-    const flip7 = d.numbers.length>=7;
+    const has7 = f7count(d)>=7;
     const histStr = p.rounds.length
       ? 'rounds: '+p.rounds.map(r=>r.bust?'×':(r.score+(r.flip7?'⚡':''))).join(' · ')
       : '';
+
+    const vengBlock = isVeng() ? `
+        <div class="mods" style="margin-top:8px">
+          <div class="mod luck ${d.lucky13?'on':''}" data-act="lucky13">Lucky 13</div>
+          ${has7 ? `<div class="mod f7 ${!d.noF7?'on':''}" data-act="f7toggle">${!d.noF7?'Flip 7: +15 to me':'Flip 7: −15 a rival'}</div>` : ''}
+        </div>
+        <h4>Minus cards</h4>
+        <div class="mods">
+          ${NEGMODS.map(m=>`<div class="mod neg ${(d.negmods||[]).includes(m)?'on':''}" data-act="negmod" data-m="${m}">−${m}</div>`).join('')}
+        </div>
+        <h4>Steals / penalties (±)</h4>
+        <div class="adjrow">
+          <button class="adjbtn" data-act="adjm">−5</button>
+          <input class="adj-input" data-act="adjinput" type="number" inputmode="numeric" value="${d.adjust||0}">
+          <button class="adjbtn" data-act="adjp">+5</button>
+        </div>
+        <div class="vhint">Use ± for cards played on this player — a stolen card's value, or the −15 when a rival flips 7. Tap “Flip 7: +15 to me” to switch it to penalising instead.</div>
+        <button class="unluckybtn" data-act="unlucky7">Unlucky 7 — discard all, keep only a 7</button>
+    ` : '';
 
     return `
     <div class="player ${open?'open':''}" data-id="${p.id}">
@@ -420,18 +483,19 @@ function render(){
         <div class="chev">▶</div>
       </div>
       <div class="panel">
-        <h4>Number cards kept (${d.numbers.length})</h4>
+        <h4>Number cards kept (${f7count(d)})</h4>
         <div class="grid">
-          ${NUMBERS.map(n=>`<div class="tile ${d.numbers.includes(n)?'on':''}" data-act="num" data-n="${n}">${n}</div>`).join('')}
+          ${nums.map(n=>`<div class="tile ${d.numbers.includes(n)?'on':''}" data-act="num" data-n="${n}">${n}</div>`).join('')}
         </div>
         <h4>Modifiers</h4>
         <div class="mods">
           ${MODS.map(m=>`<div class="mod ${d.mods.includes(m)?'on':''}" data-act="mod" data-m="${m}">+${m}</div>`).join('')}
           <div class="mod x2 ${d.x2?'on':''}" data-act="x2">×2</div>
         </div>
+        ${vengBlock}
         <div class="summary">
-          <div class="calc">${calcText(d)}${flip7?'<span class="flip7tag">FLIP 7 +15</span>':''}</div>
-          <div class="roundscore ${d.bust?'bust':''}">${d.bust?'0':s}</div>
+          <div class="calc">${calcText(d)}${has7?'<span class="flip7tag">FLIP 7</span>':''}</div>
+          <div class="roundscore ${d.bust?'bust':''} ${s<0?'neg':''}">${d.bust && !d.adjust ? '0' : s}</div>
         </div>
         <div class="panelbtns">
           <button class="bustbtn ${d.bust?'on':''}" data-act="bust">${d.bust?'Busted ✕':'Bust (0)'}</button>
@@ -450,13 +514,16 @@ function render(){
 function rankOf(ranked,p){ return ranked.findIndex(x=>x.id===p.id)+1; }
 
 function calcText(d){
-  if(d.bust) return 'Busted this round';
-  if(!d.numbers.length && !d.mods.length) return 'No cards yet';
-  let numSum = d.numbers.reduce((a,b)=>a+b,0);
-  let parts = [];
+  const adj = d.adjust || 0;
+  if(d.bust) return adj ? `Busted, ${adj>0?'+':'−'}${Math.abs(adj)}` : 'Busted this round';
+  let numSum = d.numbers.reduce((a,b)=>a+b,0) + (d.lucky13?13:0);
+  if(!numSum && !d.mods.length && !(d.negmods||[]).length && !adj) return 'No cards yet';
+  const parts = [];
   parts.push(d.x2 ? `(${numSum})×2` : `${numSum}`);
   d.mods.forEach(m=>parts.push('+'+m));
-  if(d.numbers.length>=7) parts.push('+15');
+  (d.negmods||[]).forEach(m=>parts.push('−'+m));
+  if(f7count(d)>=7 && !d.noF7) parts.push('+15');
+  if(adj) parts.push(`${adj>0?'+':'−'}${Math.abs(adj)}`);
   return parts.join(' ');
 }
 
@@ -464,7 +531,7 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<'
 function show(id){ document.getElementById(id).classList.add('show'); }
 function hide(id){ document.getElementById(id).classList.remove('show'); }
 
-/* ---------- custom modal (replaces native confirm/prompt/alert) ---------- */
+/* ---------- custom modal ---------- */
 function modal({ title='', message='', html=false, input=null, stack=false, buttons=[] }){
   return new Promise(resolve=>{
     const ov = document.getElementById('modalOverlay');
@@ -495,7 +562,6 @@ function modal({ title='', message='', html=false, input=null, stack=false, butt
       if(e.key==='Escape') close(null);
       else if(e.key==='Enter' && primary){ e.preventDefault(); close(valOf(primary)); }
     }
-
     buttons.forEach(b=>{
       const btn = document.createElement('button');
       btn.textContent = b.label;
@@ -503,7 +569,6 @@ function modal({ title='', message='', html=false, input=null, stack=false, butt
       btn.onclick = ()=>close(valOf(b));
       elB.appendChild(btn);
     });
-
     ov.addEventListener('click', onBackdrop);
     document.addEventListener('keydown', onKey);
     ov.classList.add('show');
@@ -526,13 +591,13 @@ function uiAlert({ title, message, okText='Got it' }){
   return modal({ title, message, html:true, buttons:[{ label:okText, value:true, style:'primary' }] });
 }
 
-/* ---------- winner overlay + game stats ---------- */
+/* ---------- winner + stats ---------- */
 function gameStats(){
-  let topF7={n:0,name:''}, bigR={s:0,name:''}, mostB={b:0,name:''};
+  let topF7={n:0,name:''}, bigR={s:-1e9,name:''}, mostB={b:0,name:''};
   state.players.forEach(p=>{
     const f7 = p.rounds.filter(r=>r.flip7).length;
     const busts = p.rounds.filter(r=>r.bust).length;
-    const big = p.rounds.reduce((m,r)=>Math.max(m,r.score),0);
+    const big = p.rounds.reduce((m,r)=>Math.max(m,r.score),-1e9);
     if(f7>topF7.n) topF7={n:f7,name:p.name};
     if(big>bigR.s) bigR={s:big,name:p.name};
     if(busts>mostB.b) mostB={b:busts,name:p.name};
@@ -546,7 +611,7 @@ function gameStats(){
 function showWin(w){
   const ranked = state.players.slice().sort((a,b)=>b.total-a.total);
   document.getElementById('winName').textContent = w.name;
-  document.getElementById('winScore').textContent = w.total + ' points';
+  document.getElementById('winScore').textContent = w.total + ' points' + (isVeng()?' · Vengeance':'');
   document.getElementById('winRank').innerHTML = ranked.map((p,i)=>
     `<li><span><span class="dot" style="background:${p.color||'#888'}"></span>${['🥇','🥈','🥉'][i]||((i+1)+'.')} ${escapeHtml(p.name)}</span><span>${p.total}</span></li>`).join('');
   const stats = gameStats();
@@ -568,7 +633,7 @@ function showLog(){
       rows += `<tr><td class="rd">${i+1}</td>`+state.players.map(p=>{
         const r = p.rounds[i];
         if(!r) return '<td>·</td>';
-        if(r.bust) return '<td class="b">✕</td>';
+        if(r.bust && !r.score) return '<td class="b">✕</td>';
         return `<td>${r.score}${r.flip7?'<span class="f7">⚡</span>':''}</td>`;
       }).join('')+'</tr>';
     }
@@ -583,10 +648,9 @@ function showHistory(){
   const hist = loadHistory();
   const body = document.getElementById('histBody');
   if(!hist.length){
-    body.innerHTML = `<div class="logempty">No finished games yet.<br>Win a game to 200 and it'll be saved here — with an all-time leaderboard.</div>`;
+    body.innerHTML = `<div class="logempty">No finished games yet.<br>Win a game and it'll be saved here — with an all-time leaderboard.</div>`;
     show('historyOverlay'); return;
   }
-  // aggregate leaderboard by player name
   const agg = {};
   hist.forEach(g=>g.players.forEach(p=>{
     const a = agg[p.name] || (agg[p.name]={ name:p.name, games:0, wins:0, best:0, flip7s:0, color:p.color });
@@ -604,9 +668,9 @@ function showHistory(){
   const past = hist.slice().reverse().map(g=>{
     const dt = new Date(g.date);
     const dstr = dt.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+dt.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
-    const scores = g.players.slice().sort((a,b)=>b.total-a.total)
-      .map(p=>`${escapeHtml(p.name)} ${p.total}`).join(' · ');
-    return `<div class="gamecard"><div class="gc-h"><span>🏆 ${escapeHtml(g.winner)}</span><span class="gc-d">${dstr}</span></div><div class="gc-s">${scores}</div></div>`;
+    const scores = g.players.slice().sort((a,b)=>b.total-a.total).map(p=>`${escapeHtml(p.name)} ${p.total}`).join(' · ');
+    const mode = g.mode==='vengeance' ? '<span class="gc-mode">⚔️ Vengeance · </span>' : '';
+    return `<div class="gamecard"><div class="gc-h"><span>🏆 ${escapeHtml(g.winner)}</span><span class="gc-d">${mode}${dstr}</span></div><div class="gc-s">${scores}</div></div>`;
   }).join('');
 
   body.innerHTML = `<h4>All-time leaderboard</h4><div class="logwrap">${lb}</div>`
@@ -622,6 +686,9 @@ function showHistory(){
 
 /* ---------- settings ---------- */
 function renderSettings(){
+  document.querySelectorAll('#modeSeg button').forEach(b=> b.classList.toggle('on', b.dataset.m===state.mode));
+  document.getElementById('brutalWrap').style.display = isVeng() ? '' : 'none';
+  document.querySelectorAll('#brutalSeg button').forEach(b=> b.classList.toggle('on', (b.dataset.b==='on')===!!state.brutal));
   const t = state.target, custom = !PRESETS.includes(t);
   document.querySelectorAll('#targetSeg button').forEach(b=>{
     const v = b.dataset.t;
@@ -630,12 +697,9 @@ function renderSettings(){
   const ci = document.getElementById('targetCustom');
   ci.style.display = custom ? '' : 'none';
   if(custom) ci.value = t;
-}
-function showSettings(){
   document.querySelectorAll('#soundSeg button').forEach(b=> b.classList.toggle('on', (b.dataset.s==='off')===state.muted));
-  renderSettings();
-  show('settingsOverlay');
 }
+function showSettings(){ renderSettings(); show('settingsOverlay'); }
 
 /* ---------- sound + haptics ---------- */
 let actx = null;
@@ -663,14 +727,10 @@ function sfx(name){
   if(name==='win'){ [523,659,784,1047,1319].forEach((f,i)=>beep(f,i*0.12,0.3,'triangle',0.2)); vibe([90,40,90,40,180]); }
 }
 
-/* ---------- wake lock (keep screen on) ---------- */
+/* ---------- wake lock ---------- */
 let wakeLock = null;
 async function reqWake(){
-  try{
-    if('wakeLock' in navigator && state.players.length && !document.hidden){
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  }catch(e){}
+  try{ if('wakeLock' in navigator && state.players.length && !document.hidden){ wakeLock = await navigator.wakeLock.request('screen'); } }catch(e){}
 }
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) reqWake(); });
 
@@ -709,7 +769,7 @@ document.getElementById('nameInput').addEventListener('keydown',e=>{ if(e.key===
 
 document.getElementById('endBtn').onclick = async ()=>{
   reqWake();
-  const anyScored = state.players.some(p=>roundScore(p.draft)>0 || p.draft.bust);
+  const anyScored = state.players.some(p=>roundScore(p.draft)!==0 || p.draft.bust);
   if(!anyScored){
     const ok = await uiConfirm({ title:'No scores entered', message:'Bank a round of zeros for everyone anyway?', confirmText:'Bank zeros' });
     if(!ok) return;
@@ -733,12 +793,12 @@ document.getElementById('resetBtn').onclick = async ()=>{
     ]
   });
   if(!choice) return;
-  state = { round:1, muted:state.muted, target:state.target, openId:null,
+  state = { round:1, muted:state.muted, target:state.target, mode:state.mode, brutal:state.brutal, openId:null,
     players: choice==='keep' ? state.players.map(p=>({id:p.id,name:p.name,total:0,rounds:[],draft:freshDraft(),color:p.color})) : [] };
   save(); render();
 };
 
-// header buttons
+// header
 document.getElementById('histBtn').onclick = showHistory;
 document.getElementById('logBtn').onclick = showLog;
 document.getElementById('setBtn').onclick = showSettings;
@@ -747,12 +807,20 @@ document.getElementById('histClose').onclick = ()=>hide('historyOverlay');
 document.getElementById('setClose').onclick = ()=>hide('settingsOverlay');
 document.getElementById('winClose').onclick = ()=>hide('winOverlay');
 document.getElementById('winNew').onclick = ()=>{ hide('winOverlay'); document.getElementById('resetBtn').click(); };
-
 ['logOverlay','historyOverlay','settingsOverlay','winOverlay'].forEach(id=>{
   const ov = document.getElementById(id);
   ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('show'); });
 });
 
+// settings: mode
+document.getElementById('modeSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  state.mode = b.dataset.m; save(); renderSettings(); render();
+});
+document.getElementById('brutalSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  state.brutal = b.dataset.b==='on'; save(); renderSettings();
+});
 // settings: target
 document.getElementById('targetSeg').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
@@ -769,11 +837,11 @@ document.getElementById('targetCustom').addEventListener('input', e=>{
 // settings: sound
 document.getElementById('soundSeg').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
-  state.muted = b.dataset.s==='off';
-  save(); showSettings(); render();
+  state.muted = b.dataset.s==='off'; save(); renderSettings(); render();
   if(!state.muted) sfx('flip7');
 });
 
+// player card taps
 document.getElementById('players').addEventListener('click', e=>{
   const card = e.target.closest('.player'); if(!card) return;
   const p = state.players.find(x=>x.id===card.dataset.id); if(!p) return;
@@ -784,22 +852,56 @@ document.getElementById('players').addEventListener('click', e=>{
   if(act==='toggle'){ state.openId = state.openId===p.id ? null : p.id; save(); render(); return; }
   if(act==='num'){
     const n = +e.target.dataset.n;
-    const before = d.numbers.length;
+    const before = f7count(d);
     if(d.numbers.includes(n)) d.numbers = d.numbers.filter(x=>x!==n);
     else d.numbers.push(n);
     if(d.numbers.length) d.bust = false;
-    if(before < 7 && d.numbers.length >= 7){ sfx('flip7'); confetti(50); }
+    if(before<7 && f7count(d)>=7){ sfx('flip7'); confetti(50); }
   }
   if(act==='mod'){
     const m = +e.target.dataset.m;
     if(d.mods.includes(m)) d.mods = d.mods.filter(x=>x!==m); else d.mods.push(m);
   }
   if(act==='x2'){ d.x2 = !d.x2; }
+  if(act==='lucky13'){
+    const before = f7count(d);
+    d.lucky13 = !d.lucky13; if(d.lucky13) d.bust = false;
+    if(before<7 && f7count(d)>=7){ sfx('flip7'); confetti(50); }
+  }
+  if(act==='negmod'){
+    const m = +e.target.dataset.m; d.negmods = d.negmods||[];
+    if(d.negmods.includes(m)) d.negmods = d.negmods.filter(x=>x!==m); else d.negmods.push(m);
+  }
+  if(act==='f7toggle'){ d.noF7 = !d.noF7; }
+  if(act==='adjm'){ d.adjust = (d.adjust||0) - 5; }
+  if(act==='adjp'){ d.adjust = (d.adjust||0) + 5; }
+  if(act==='unlucky7'){ p.draft = freshDraft(); p.draft.numbers = [7]; }
   if(act==='bust'){ d.bust = !d.bust; if(d.bust) sfx('bust'); }
   if(act==='clear'){ p.draft = freshDraft(); }
   if(act==='rename'){ doRename(p); return; }
   if(act==='del'){ doDelete(p); return; }
+  if(act==='adjinput') return;   // handled by input listener; don't re-render (keeps focus)
   save(); render();
+});
+
+// ± adjustment text input (live, no re-render so focus is kept)
+document.getElementById('players').addEventListener('input', e=>{
+  const inp = e.target.closest('[data-act="adjinput"]'); if(!inp) return;
+  const card = e.target.closest('.player'); if(!card) return;
+  const p = state.players.find(x=>x.id===card.dataset.id); if(!p) return;
+  let v = parseInt(inp.value,10); if(isNaN(v)) v = 0;
+  p.draft.adjust = v; save();
+  const s = roundScore(p.draft);
+  const rs = card.querySelector('.roundscore');
+  if(rs){ rs.textContent = (p.draft.bust && !p.draft.adjust) ? '0' : s; rs.classList.toggle('neg', s<0); }
+  const tb = card.querySelector('.pthis b');
+  if(tb && !p.draft.bust) tb.textContent = s;
+  const calc = card.querySelector('.calc');
+  if(calc){
+    const txt = calcText(p.draft) + (calc.querySelector('.flip7tag') ? ' ' : '');
+    if(calc.firstChild && calc.firstChild.nodeType===3) calc.firstChild.nodeValue = txt;
+    else calc.insertBefore(document.createTextNode(txt), calc.firstChild);
+  }
 });
 
 async function doRename(p){
@@ -827,7 +929,7 @@ installBtn.onclick = async ()=>{
   else { await uiAlert({ title:'📲 Add to Home Screen', message:'<b>iPhone / iPad (Safari):</b> tap the Share button, then “Add to Home Screen”.<br><br><b>Android (Chrome):</b> open the ⋮ menu, then “Install app”.' }); }
 };
 
-/* ---------- service worker (offline) ---------- */
+/* ---------- service worker ---------- */
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
@@ -835,7 +937,13 @@ if('serviceWorker' in navigator){
 /* ---------- init / migration ---------- */
 if(typeof state.muted !== 'boolean') state.muted = false;
 if(typeof state.target !== 'number') state.target = 200;
-state.players.forEach((p,i)=>{ if(!p.draft) p.draft=freshDraft(); if(!p.color) p.color = PALETTE[i % PALETTE.length]; });
+if(state.mode !== 'vengeance') state.mode = 'classic';
+if(typeof state.brutal !== 'boolean') state.brutal = false;
+state.players.forEach((p,i)=>{
+  if(!p.draft) p.draft=freshDraft();
+  if(!('negmods' in p.draft)) p.draft = Object.assign(freshDraft(), p.draft);
+  if(!p.color) p.color = PALETTE[i % PALETTE.length];
+});
 render();
 reqWake();
 </script>

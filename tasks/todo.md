@@ -5,7 +5,11 @@
 - Game history + all-time leaderboard (separate localStorage) — tested
 - End-of-game highlights (biggest round / most Flip 7s / most busts) — tested
 - Player colors + avatar chips + medals — tested
-- Future idea: "Flip 7 with a Vengeance" mode (negative scores, steal points) — needs its own card set, deferred.
+- ✅ "Flip 7: With a Vengeance" mode SHIPPED (2026-05-31): Classic/Vengeance toggle in Settings.
+  Vengeance adds 13 + Lucky 13 cards, minus cards (−2..−10), Unlucky 7 reset, ± steal/penalty box,
+  Flip 7 choice (+15 self / −15 rival), Brutal toggle (floor-at-0 vs negative). Unit + browser tested.
+  Note: table-resolved actions (Steal/Swap/Discard/Flip Four/Just One More) net via the ± box by design.
+  Minus-card denominations assumed −2..−10 (mirror of +mods); ± box covers any oddballs (e.g. divide).
 
 
 ## Context
